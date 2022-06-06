@@ -1,0 +1,16 @@
+#ifndef ZWIDGETBUTTON_H
+#define ZWIDGETBUTTON_H
+
+#include <QPushButton>
+
+class ZWidgetButton : public QPushButton
+{
+    Q_OBJECT
+public:
+    ZWidgetButton(QWidget *parent=nullptr);
+    
+private:
+    QWidget
+};
+
+#endif // ZWIDGETBUTTON_H

@@ -1,0 +1,14 @@
+#ifndef EVENTPROXY_H
+#define EVENTPROXY_H
+
+#include "base/inforesult.h"
+
+class EventProxy
+{
+public:
+    EventProxy();
+    
+    virtual void send(MsgResult result);
+};
+
+#endif // EVENTPROXY_H
