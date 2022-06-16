@@ -1,0 +1,127 @@
+#####################################################################
+# 默认配置文件
+#####################################################################
+
+common:
+  title: 禅道集成运⾏环境
+  lang: zh-cn
+  theme: blue
+
+service:
+  - apache:
+    port: 80
+    path: apache\
+    title: Apache
+    enabled: false
+    version: 2.4.25
+    vcRumtime: VC 9.0 SP1
+    log: apache/
+    beforeCommand:
+      - "%APACHE_PATH%bin/htpasswd.exe -bc %APACHE_PATH%/auth/.htaccess %APACHE_ACCOUNT% %APACHE_PASSWORD%"
+    serviceCommand: "%APACHE_EXE% -k install -n %APACHE_SER_NAME%"
+    autoPorts: [80, 8999]
+    account: zentao
+    password: 123456
+    exePath: bin\httpd.exe
+
+  - mysql:
+    port: 3306
+    path: mysql\
+    title: MySQL
+    enabled: false
+    version: 10.1.25
+    vcRumtime: VC 9.0 SP1
+    log: mysql\
+    config: "mysql/my.ini|my.ini"
+    serviceCommand: '%MYSQL_PATH%bin\mysqld.exe --install %MYSQL_SER_NAME% --defaults-file="%MYSQL_PATH%/my.ini"'
+    afterCommand:
+      - '%MYSQL_EXE% --user=%MYSQL_ACCOUNT% --password=%MYSQL_PASSWORD_OLD% --port=%MYSQL_PORT% -e "SET password for %MYSQL_ACCOUNT%@localhost=password(''%MYSQL_PASSWORD%'')"; '
+      - '%MYSQL_EXE% --user=%MYSQL_ACCOUNT% --password=%MYSQL_PASSWORD% --port=%MYSQL_PORT% -e "flush privileges;"; '
+    autoPorts: [3306, 3999]
+    account: root
+    password: 123456
+    exePath: bin\mysql.exe
+    adminer: adminer\adminer.php
+
+  - php:
+    path: php\
+    title: PHP
+    enabled: false
+    version: 7.2.19
+    vcRumtime: VC 9.0 SP1
+    serviceName: false
+    config: php\php.ini|php.ini
+    exePath: php.exe
+
+  - xxd:
+    port: 11444
+    fixPort: true
+    path: xxd\
+    title: XXD
+    enabled: false
+    version: 7.5.09
+    serviceCommand: sc create %XXD_SER_NAME% binPath= "%XXD_EXE%" start= demand displayname=%XXD_SER_NAME%
+    exePath: xxd.exe
+
+  - gogs:
+    path: gogs\
+    title: Gogs
+    port: 81
+    autoPorts: [81, 8999]
+    enabled: false
+    launch: /
+    log: gogs\
+    config: "gogs/app.ini|custom/conf/app.ini"
+    serviceCommand: sc create %GOGS_SER_NAME% start= auto binPath= "%GOGS_EXE%  web --config %GOGS_PATH%custom/conf/app.ini"
+    exePath: gogs.exe
+
+  - srs:
+    path: srs\
+    title: SRS
+    version: 1.0.0
+    enabled: false
+    launch: srs/index.html
+    serviceName:
+      - srs:
+        path: srs\
+        sourcePath:
+        title: srs
+        version: 1.0.0
+        enabled: false
+        launch: srs/index.html
+        serviceCommand:
+          - nssm install %SRS_SER_NAME% %SRS_PATH%objs\srs.exe
+          - nssm set %SRS_SER_NAME% AppParameters -c %SRS_PATH%conf\rtc.conf
+        startCommand: nssm start
+        removeCommand: nssm remove %SER_NAME% confirm
+        exePath: objs\srs.exe
+
+      - signaling:
+        path: srs\
+        title: signaling
+        version: 1.0.0
+        enabled: false
+        launch: srs/index.html
+        serviceCommand: nssm install %SIGNALING_SER_NAME% %SRS_PATH%objs\signaling.exe
+        startCommand: nssm start
+        removeCommand: nssm remove %SER_NAME% confirm
+        exePath: objs\signaling.exe
+    exePath: objs\srs.exe
+
+  - rr:
+    path: rr\
+    title: RR
+    version: 1.0.0
+    enabled: false
+    launch: xxb/
+    config:
+      - xxb\my.php|%APP_PATH%xxb/config/my.php
+      - rr\.rr.json|%SERVICE_PATH%rr/.rr.json
+    serviceCommand:
+      - nssm install %RR_SER_NAME% %RR_PATH%rr.exe
+      - nssm set %RR_SER_NAME% AppParameters serve
+    startCommand: nssm start
+    removeCommand: nssm remove %SER_NAME% confirm
+    exePath: rr.exe
+
+

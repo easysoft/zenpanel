@@ -1,0 +1,386 @@
+QPushButton::menu-indicator{
+    width: 0px;
+    image:none;
+}
+
+/* 程序主功能按钮样式定义 ---------------------------------------------- */
+QPushButton[forUse='installBtn'] {
+    color:#32a073;
+    font-size:18px;
+    font-weight:500;
+    padding: 2px 10px;
+    background-color:#ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 15px;
+    min-width: 96px;
+}
+
+QPushButton[forUse='installBtn']:hover{
+    border: 1px solid #bee7d3;
+    background-color:#bee7d3;
+}
+
+QPushButton[forUse='installBtn']:pressed{
+    border: 1px solid #bee7d3;
+    background-color:#bee7d3;
+}
+
+QPushButton[forUse='uninstallBtn'] {
+    color:#ffffff;
+    font-size:18px;
+    font-weight:500;
+    padding: 2px 10px;
+    background-color:#32a073;
+    border: 1px solid #32a073;
+    border-radius: 15px;
+    min-width: 96px;
+}
+
+QPushButton[forUse='uninstallBtn']:hover{
+    border: 1px solid #32a073;
+    background-color:#32a073;
+}
+
+QPushButton[forUse='uninstallBtn']:pressed{
+    border: 1px solid #32a073;
+    background-color:#32a073;
+}
+
+/* 程序次要功能按钮样式定义 ------------------------------------------- */
+QWidget[forUse='wrapper']{
+    background-color:#5cc290;
+    border:1px solid rgba(255,255,255,50%);
+    border-radius: 10px;
+}
+
+QWidget[forUse='wrapper']  QFrame[forUse='hSplit'] {
+    margin-left:3px;
+    margin-right:3px;
+    padding:0px;
+    color:rgba(255,255,255,50%);
+}
+
+QPushButton[forUse='iconBtn'] {
+    font-family:iconfont-zentao;
+    color:rgba(255,255,255,70%);
+    font-size:12px;
+    font-weight:500;
+    background-color:transparent;
+    margin:0px;
+    padding:0px;
+}
+
+QPushButton[forUse='iconBtn']:hover{
+    color:#FFFFFF;
+}
+
+QPushButton[forUse='iconBtn']:pressed{
+    color:#FFFFFF;
+}
+
+QPushButton[forSize='big'] {
+    font-size:18px;
+}
+
+
+/* 服务功能模块样式定义 ---------------------------------*/
+QWidget[forUse='service']{
+    background-color:transparent;
+    border:1px solid rgba(255, 255, 255, 50%);
+    border-radius: 4px;
+}
+
+QWidget[forUse='service'] QLabel[forUse='title']{
+    font-size: 14px;
+    color: #ffffff;
+}
+
+QLabel[forColor='success']{
+    color:#52ffa4;
+}
+
+QLabel[forColor='warning']{
+    color: #ffe44b ;
+}
+
+QLabel[iconSize='normal']{
+    font-size: 6px;
+}
+
+QLabel[iconSize='big']{
+    font-size: 15px;
+}
+
+QLabel[forUse='lblsuccess']{
+    font-size: 14px;
+    color: #ffffff;
+}
+
+QLabel[forUse='lblwarning']{
+    font-size: 14px;
+}
+
+QLabel[forLang='en']{
+    font-size: 10px;
+}
+
+QLabel[forLang='en']{
+    font-size: 10px;
+}
+
+QLabel[forUse='iconsuccess']{
+    font-family:iconfont-zentao;
+    font-weight:500;
+    background-color:transparent;
+    margin:0px;
+    padding:0px;
+
+}
+
+QLabel[forUse='iconwarning']{
+    font-family:iconfont-zentao;
+    font-weight:500;
+    background-color:transparent;
+    margin:0px;
+    padding:0px;
+
+}
+
+/* 服务菜单小图标 */
+QPushButton[forUse='serviceMore']{
+    font-family:iconfont-zentao;
+    color: rgba(255, 255, 255, 50%);
+    font-size:5px;
+    font-weight:500;
+    background-color:transparent;
+    margin:0px;
+    padding:0px;
+
+}
+
+/* 日志tab相关样式定义 ------------------------------------------------- */
+QWidget[forUse='tabContainer'] {
+    border-bottom:1px solid #589972;
+    background-color:transparent;
+}
+
+QPushButton[forUse='tabBtn'] {
+    color:#589972;
+    font-size:12px;
+    font-weight:500;
+    margin:0px;
+    padding:2px 0px;
+    background-color:transparent;
+}
+
+QPushButton[forUse='tabBtn']:hover{
+    color:#00ba35;
+}
+
+QPushButton[forUse='tabBtn']:pressed{
+    color:#00ba35;
+}
+
+QPushButton[forUse='tabBtn']:checked{
+    color:#00ba35;
+}
+
+/* 日志内容相关样式定义 ------------------------------------------------- */
+QTextEdit{
+    color: #589972;
+    font-size: 12px;
+    border:0px solid #ffffff;
+    background-color:transparent;
+}
+
+/*垂直滚动条*/
+QScrollBar:vertical{
+    width:10px;
+    margin:0px,0px,0px,0px;
+    padding-top:0px;
+    padding-bottom:0px;
+    background-color: #c6ead8;
+    border-radius: 5px;
+}
+QScrollBar::handle:vertical{
+    min-height:10;
+    background-color: #8dd4b1;
+    border-radius: 5px;
+}
+
+QScrollBar::sub-line:vertical{
+    height:0px;
+    subcontrol-position:top;
+}
+
+QScrollBar::add-line:vertical{
+    height:0px;
+    subcontrol-position:bottom;
+}
+
+QScrollBar::add-page:vertical{
+    background-color:transparent;
+}
+QScrollBar::sub-page:vertical{
+    background-color:transparent;
+}
+
+/* 弹出菜单样式 ------------------------------------------------- */
+QWidget[forRadius='nestedMenu']{
+    border-radius: 1px;
+}
+
+QWidget[forRadius='mainMenu']{
+    border-radius: 4px;
+}
+
+QWidget[forUse='customMenu']{
+    background-color:#8dd4b1;
+}
+
+QWidget[forUse='customMenu'] QPushButton{
+    color: #ffffff;
+    font-size: 12px;
+    background-color:transparent;
+    padding: 4px 15px;
+    border: none;
+}
+
+QWidget[forUse='customMenu'] QPushButton:pressed{
+    background-color:#67c496;
+}
+
+QWidget[forUse='customMenu'] QPushButton:hover{
+    background-color:#67c496;
+}
+
+QMenu[forRadius='radiusMenu'] {
+	border-radius: 4px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+QMenu[forUse='menu'] {
+	border: none;
+	background-color: #8dd4b1; 
+	font-size: 12px; 
+}
+
+QMenu[forUse='menu']::item { 
+	border: none;
+	background-color: transparent;
+	color: #ffffff; 
+    padding: 4px 15px;
+}
+
+QMenu[forUse='menu']::item:selected { 
+    background-color: #67c496; 
+}
+
+QMenu[forUse='menu']::item:disabled { 
+	color: rgba(255, 255, 255, 50%);
+}
+
+/* 弹出对话框样式 ------------------------------------------------*/
+QWidget[forUse='window'] {  
+    background-color: #32a073;
+    border-radius: 4px;
+}
+
+QWidget[forUse='window']  QFrame {
+    padding:0px;
+    color:#ffffff;
+}
+
+QWidget[forUse='window'] QLabel {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+QWidget[forUse='window'] QLineEdit {
+    color: #ffffff;
+    font-size: 14px;
+    background-color: transparent;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+QWidget[forUse='window'] QLineEdit:disabled {
+    color: rgba(255, 255, 255, 60%);
+    border: 1px solid rgba(255, 255, 255, 60%);
+}
+
+QPushButton[forUse='yes'] {
+    color:#ffffff;
+    font-size:14px;
+    font-weight:500;
+    margin:0px;
+    padding:2px 15px;
+    background-color:transparent;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+}
+
+QPushButton[forUse='no'] {
+    color:rgba(255, 255, 255, 60%);
+    font-size:14px;
+    font-weight:500;
+    margin:0px;
+    padding:2px 15px;
+    background-color:transparent;
+    border: 1px solid rgba(255, 255, 255, 60%);
+    border-radius: 4px;
+}
+
+
+/* 托盘菜单样式 */
+QMenu[forUse='tray'] { 
+	font-size: 14px; 
+}
+
+
+/* 页脚版权信息样式 ------------------------------------------------*/
+QLabel#footor {
+    color:rgba(255,255,255,70%);
+    font-size: 12px;
+}
+
+/* apache设置样式 --------------------------------------------------*/
+QCheckBox {
+    color:rgba(255,255,255,70%);
+    font-size: 12px;
+}
+
+
+QLabel[forUse='setting'] {
+    color:rgba(255,255,255,70%);
+    font-size: 12px;
+}
+
+/* button link --------------------------------------------------*/
+QPushButton[forUse='link'] {
+    color:rgba(255,255,255,70%);
+    font-size:12px;
+    background-color:transparent;
+    margin:0px;
+    padding:0px;
+    /* font-style:italic; */
+    /* text-decoration:underline; */
+    /* font-weight: 500; */
+}
+
+QPushButton[forUse='link']:hover{
+    color:#FFFFFF;
+}
+
+QPushButton[forUse='link']:pressed{
+    color:#FFFFFF;
+}
+
+QLabel[forUse='checked']{
+    font-size: 10px;
+    color:#FFFFFF;
+    font-size: 10px;
+}
+

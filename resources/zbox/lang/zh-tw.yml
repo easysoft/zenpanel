@@ -1,0 +1,169 @@
+# 通用语言定义(常规的如保存，提交之类)
+common:
+  modifyAccount: 修改密碼
+  modifyPort: 修改埠號
+  setPort: 設置埠號
+  account: 賬戶
+  password: 密碼
+  confirm: 確定
+  cancel: 取消
+  modify: 修改
+  copyPassword: 複製
+  modifyPassword: 修改
+
+  errorPortUsed: 埠號已被使用。
+  errorPortEmpty: 埠號不能為空。
+  errorUseEmpty: 帳號或密碼不能為空。
+  errorAccount: 帳號錯誤(4-8位，字母開頭，數字+字母)。
+  errorPassword: 密碼強度弱(6-12位，大寫字母 + 小寫字母 + 數字)。
+# 窗体
+window:
+  product: 禪道
+  title: 禪道集成運行環境
+  closeLog: 收起日誌
+  openLog: 打開日誌
+  notInstalled: 啟動禪道
+  installing: 正在啟動...
+  installed:
+      visit: 訪問禪道
+      stop: 停止禪道
+  startLog: 面板日誌
+  askPasswordTitle: 密碼修改建議
+  askPasswordDesc: 您資料庫當前密碼強度偏弱，存在風險，建議修改。單擊取消繼續安裝。
+  errorWinTitle: 確認
+  errorAppLocationPath: 無法安裝啟動服務，因為當前程序所在路徑包含中文等特殊字符。程序所在路徑必須僅包含數字、大小寫字母或下劃線，請修改路徑後重試。
+
+  vcAskTitle: 確認
+  vcAskContent: 檢查到沒有安裝VC++運行環境，將無法繼續使用。是否立即安裝？
+  errorVCInstall: VC++運行環境安裝失敗，是否忽略VC++環境檢查並繼續運行？確定忽略繼續運行，取消運行程序會自動退出。
+
+  apacheUser: 啟用Apache用戶訪問驗證
+  askModifyPasswordRerunTitle: 操作確認
+  askModifyRerunContent: 系統運行中，修改密碼會導致服務重啟，請確認是否修改密碼並重新啟動？
+  askModifyAuthEnableTitle: 操作確認
+  askModifyAuthEnableContnt: 系統運行中，啟用或關閉 Apache 登錄驗證會導致服務重啟，請確認是否修改並重新啟動？
+
+  closeTipTitle: 關閉提示
+  closeTipDesc: 關閉後程式會在後臺繼續運行，可按一下系統託盤顯示或者退出程式。
+  closeTipCheck: 下次不再詢問。
+
+# 托盘
+tray:
+  show: 顯示
+  quit: 退出
+# 基础信息
+basics:
+  title: 禪道集成運⾏環境 ${0}
+  serviceVersion: "${0} 版本：${1}"
+  productVersion: 禪道版本 ${0}
+  currentDir: "當前目錄：${0}"
+# 安装消息
+message:
+  startingApp: 正在啟動應用...
+  startAppSuccess: 應用啟動成功。
+  startAppError: 應用啟動失敗，請稍後重試。
+
+  stopingApp: 正在停止應用...
+  stopAppSuccess: 應用停止成功。
+  stopAppError: 應用停止失敗，請稍後重試。
+
+  uninstallingApp: 正在卸載應用...
+  uninstallAppSuccess: 應用卸載成功。
+  uninstallAppError: 應用卸載失敗，請稍後重試。
+
+  errorCommandNot: ${0} 服務安裝失敗，安裝命令沒有配置。
+  errorPathNotExist: ${0} 服務安裝失敗，服務配置路徑不存在。
+  errorConfigTplNotExist: ${0} 服務安裝失敗，模板配置文件不存在。
+  errorConfigNotExist: ${0} 服務安裝失敗，配置文件目錄不存在。
+  errorConfigNoPath: ${0} 安裝失敗，配置不完整。
+
+  installSuccess:  ${0} 服務安裝成功<%，埠號：${1}%>。
+  installError: ${0} 服務安裝失敗<%，埠號：${1}%>。
+
+  uninstallSuccess: ${0} 服務卸載成功<%，埠號：${1}%>。
+  uninstallError: ${0} 服務卸載失敗<%，埠號：${1}%>。
+
+  startSuccess:  ${0} 服務啟動成功<%，埠號：${1}%>。
+  startError: ${0} 服務啟動失敗<%，埠號：${1}%>。
+
+  stopSuccess: ${0} 服務停止成功<%，埠號：${1}%>。
+  stopError: ${0} 服務停止失敗<%，埠號：${1}%>。
+
+  backupStarting: ${0} 備份開始 ...
+  backupSuccess: ${0} 備份成功，備份到：${1}。
+  backupError: ${0} 備份失敗。
+  errorBackupScriptNot: ${0} 備份失敗，腳本未配置。
+  errorBackupPathNot: ${0} 備份失敗，文件目錄未配置。
+  errorBackupPathNotExist: ${0} 備份失敗，文件目錄不存在。
+
+  modifingPort: 正在修改 ${0} 埠號<%，新埠號：${1}%>。
+  modifyPortSuccess: ${0} 埠號修改成功，新埠號：${1}。
+  modifyPortError: ${0} 埠號修改失敗。
+  modifyPortErrorNoRunning: ${0} 埠號修改失敗，服務未安裝或未啟動。
+
+  modifingUser: 正在修改 ${0} 帳號。
+  modifyUserSuccess: ${0} 帳號修改成功。
+  modifyUserError: ${0} 帳號修改失敗。
+  modifyUserErrorNoRunning: ${0} 帳號修改失敗，服務未安裝或未啟動。
+
+  errorCommand: ${0} 命令執行錯誤，應用不能正常使用。
+  errorState: ${0} 狀態錯誤，無法安裝服務。
+
+  errorUninstallNeedDelay: ${0} 服務操作未完成，無法卸載，請稍後重試。
+
+xxd:
+  message:
+    startSuccess: ${0} 服務啟動成功，服務地址：http://0.0.0.0:${1}。
+    installSuccess: ${0} 服務安裝成功，埠號：${1}。
+
+serviceStatus:
+  installIng: 安裝中...
+  installSuccess: 安裝成功
+  installError: 安裝失敗
+
+  uninstallIng: 卸載中...
+  uninstallSuccess: 卸載成功
+  uninstallError: 卸載失敗
+
+  stopIng: 停止中...
+  stopSuccess: 停止成功
+  stopError: 停止失敗
+
+  startIng: 啟動中...
+  startSuccess: <%${0}|啟動成功%>
+  startError: 啟動失敗
+
+  running: <%${0}|運行中%>
+  start_pending: 啟動中...
+  paused: 暫停
+  stop_pending: 停止中
+  stopped: 已停止
+  unknown: 未安裝
+
+theme:
+  blue: 藍色
+  green: 綠色
+  pink: 粉色
+
+menu:
+  viewService: 查看服務
+  removeService: 卸載服務
+  sysBackup: 系統備份
+  language: language
+  viewHelp: 查看幫助
+  checkUpdate: 檢查更新
+  switchTheme: 切換主題
+
+  langZhCn: 简体中文
+  langZhTw: 繁體中文
+  langEN: English
+
+  visit: 訪問
+  viewLog: 查看日誌
+  modifyPort: 修改埠
+  modifyUser: 修改密碼
+  install: 安裝服務
+  stopService: 停止服務
+  startService: 啟動服務
+  reinstall: 重新安裝
+  uninstall: 卸載服務

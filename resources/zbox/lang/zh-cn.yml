@@ -1,0 +1,169 @@
+# 通用语言定义(常规的如保存，提交之类)
+common:
+  modifyAccount: 修改密码
+  modifyPort: 修改端口
+  setPort: 设置端口
+  account: 账户
+  password: 密码
+  confirm: 确定
+  cancel: 取消
+  modify: 修改
+  copyPassword: 复制
+  modifyPassword: 修改
+
+  errorPortUsed: 端口号已被使用。
+  errorPortEmpty: 端口号不能为空。
+  errorUseEmpty: 账号或密码不能为空。
+  errorAccount: 账号错误(4-8位，字母开头，数字+字母)。
+  errorPassword: 密码强度弱(6-12位，大写字母 + 小写字母 + 数字)。
+# 窗体
+window:
+  product: 禅道
+  title: 禅道集成运行环境
+  closeLog: 收起日志
+  openLog: 打开日志
+  notInstalled: 启动禅道
+  installing: 正在启动...
+  installed:
+      visit: 访问禅道
+      stop: 停止禅道
+  startLog: 面板日志
+  askPasswordTitle: 密码修改建议
+  askPasswordDesc: 您数据库当前密码强度偏弱，存在风险，建议修改。单击取消继续安装。
+  errorWinTitle: 确认
+  errorAppLocationPath: 无法安装启动服务，因为当前程序所在路径包含中文等特殊字符。程序所在路径必须仅包含数字、大小写字母或下划线，请修改路径后重试。
+
+  vcAskTitle: 确认
+  vcAskContent: 检查到没有安装VC++运行环境，将无法继续使用。是否立即安装？
+  errorVCInstall: VC++运行环境安装失败，是否忽略VC++环境检查并继续运行？确定忽略继续运行，取消运行程序会自动退出。
+
+  apacheUser: 启用Apache用户访问验证
+  askModifyPasswordRerunTitle: 操作确认
+  askModifyRerunContent: 系统运行中，修改密码会导致服务重启，请确认是否修改密码并重新启动？
+  askModifyAuthEnableTitle: 操作确认
+  askModifyAuthEnableContnt: 系统运行中，启用或关闭 Apache 登录验证会导致服务重启，请确认是否修改并重新启动？
+
+  closeTipTitle: 关闭提示
+  closeTipDesc: 关闭后程序会在后台继续运行, 可单击系统托盘显示或者退出程序。
+  closeTipCheck: 下次不再提示。
+
+# 托盘
+tray:
+  show: 显示
+  quit: 退出
+# 基础信息
+basics:
+  title: 禅道集成运⾏环境 ${0}
+  serviceVersion: "${0} 版本：${1}"
+  productVersion: 禅道版本 ${0}
+  currentDir: "当前目录：${0}"
+# 安装消息
+message:
+  startingApp: 正在启动应用...
+  startAppSuccess: 应用启动成功。
+  startAppError: 应用启动失败，请稍后重试。
+
+  stopingApp: 正在停止应用...
+  stopAppSuccess: 应用停止成功。
+  stopAppError: 应用停止失败，请稍后重试。
+
+  uninstallingApp: 正在卸载应用...
+  uninstallAppSuccess: 应用卸载成功。
+  uninstallAppError: 应用卸载失败，请稍后重试。
+
+  errorCommandNot: ${0} 服务安装失败，安装命令没有配置。
+  errorPathNotExist: ${0} 服务安装失败，服务配置路径不存在。
+  errorConfigTplNotExist: ${0} 服务安装失败，模板配置文件不存在。
+  errorConfigNotExist: ${0} 服务安装失败，配置文件目录不存在。
+  errorConfigNoPath: ${0} 安装失败，配置不完整。
+
+  installSuccess:  ${0} 服务安装成功<%，端口号：${1}%>。
+  installError: ${0} 服务安装失败<%，端口号：${1}%>。
+
+  uninstallSuccess: ${0} 服务卸载成功<%，端口号：${1}%>。
+  uninstallError: ${0} 服务卸载失败<%，端口号：${1}%>。
+
+  startSuccess:  ${0} 服务启动成功<%，端口号：${1}%>。
+  startError: ${0} 服务启动失败<%，端口号：${1}%>。
+
+  stopSuccess: ${0} 服务停止成功<%，端口号：${1}%>。
+  stopError: ${0} 服务停止失败<%，端口号：${1}%>。
+
+  backupStarting: ${0} 备份开始 ...
+  backupSuccess: ${0} 备份成功，备份到：${1}。
+  backupError: ${0} 备份失败。
+  errorBackupScriptNot: ${0} 备份失败，脚本未配置。
+  errorBackupPathNot: ${0} 备份失败，文件目录未配置。
+  errorBackupPathNotExist: ${0} 备份失败，文件目录不存在。
+
+  modifingPort: 正在修改 ${0} 端口号<%，新端口号：${1}%>。
+  modifyPortSuccess: ${0} 端口号修改成功，新端口号：${1}。
+  modifyPortError: ${0} 端口号修改失败。
+  modifyPortErrorNoRunning: ${0} 端口号修改失败，服务未安装或未启动。
+
+  modifingUser: 正在修改 ${0} 账号。
+  modifyUserSuccess: ${0} 账号修改成功。
+  modifyUserError: ${0} 账号修改失败。
+  modifyUserErrorNoRunning: ${0} 账号修改失败，服务未安装或未启动。
+
+  errorCommand: ${0} 命令执行错误，应用不能正常使用。
+  errorState: ${0} 状态错误，无法安装服务。
+
+  errorUninstallNeedDelay: ${0} 服务操作未完成，无法卸载，请稍后重试。
+
+xxd:
+  message:
+    startSuccess: ${0} 服务启动成功，服务地址：http://0.0.0.0:${1}。
+    installSuccess: ${0} 服务安装成功，端口号：${1}。
+
+serviceStatus:
+  installIng: 安装中...
+  installSuccess: 安装成功
+  installError: 安装失败
+
+  uninstallIng: 卸载中...
+  uninstallSuccess: 卸载成功
+  uninstallError: 卸载失败
+
+  stopIng: 停止中...
+  stopSuccess: 停止成功
+  stopError: 停止失败
+
+  startIng: 启动中...
+  startSuccess: <%${0}|启动成功%>
+  startError: 启动失败
+
+  running: <%${0}|运行中%>
+  start_pending: 启动中...
+  paused: 暂停
+  stop_pending: 停止中
+  stopped: 已停止
+  unknown: 未安装
+
+theme:
+  blue: 蓝色
+  green: 绿色
+  pink: 粉色
+
+menu:
+  viewService: 查看服务
+  removeService: 卸载服务
+  sysBackup: 系统备份
+  language: language
+  viewHelp: 查看帮助
+  checkUpdate: 检查更新
+  switchTheme: 切换主题
+
+  langZhCn: 简体中文
+  langZhTw: 繁體中文
+  langEN: English
+
+  visit: 访问
+  viewLog: 查看日志
+  modifyPort: 修改端口
+  modifyUser: 修改密码
+  install: 安装服务
+  stopService: 停止服务
+  startService: 启动服务
+  reinstall: 重新安装
+  uninstall: 卸载服务

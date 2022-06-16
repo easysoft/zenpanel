@@ -1,0 +1,70 @@
+#####################################################################
+# 项目配置文件
+#####################################################################
+
+common:
+  title: window.title
+  version: 3.0
+  envPath:
+    - "%ROOT_PATH%bin/git/cmd"
+    - "%ROOT_PATH%bin/sliksvn"
+    - "%ROOT_PATH%zbox/nssm/win32"
+
+app:
+  path: ZENTAOPATH
+  title: ~window.product
+  code: zentao
+  version: ZENTAOVERSION
+  launch: index.php
+  log: tmp\log\
+  backup:
+    enabled: true
+    script: "%PHP_EXE% %ZENTAO_PATH%bin/ztcli http://127.0.0.1:%APACHE_PORT%/backup-backup.html"
+    path: "%ZENTAO_PATH%tmp/backup/"
+
+  entriesxx:
+    - #xxb
+      path: xxb\
+      title: XXB
+      code: xxb
+      version: 1.0.0
+      enabled: false,
+      serviceName: false
+      config: xxb\my.php|config\my.php
+
+service:
+  - apache:
+    enabled: true
+    serviceName: apachezt
+    config:
+      - "apache/httpd.conf|conf/httpd.conf"
+      - "ztaccess/adminer.ztaccess|%APP_PATH%adminer/.ztaccess"
+      - "ztaccess/htdocs.ztaccess|%APP_PATH%htdocs/.ztaccess"
+      - "ztaccess/ACCESSNAME.ztaccess|%APP_PATH%ZENTAODIR/www/.ztaccess"
+      - "ztaccess/htdocs.ztaccess|%SERVICE_PATH%srs/objs/nginx/html/.ztaccess"
+
+  - mysql:
+    enabled: true
+    serviceName: mysqlzt
+
+  - php:
+    enabled: true
+
+  - xxd:
+    enabled: true
+    ignore: true
+    serviceName: xxd
+
+  - gogs:
+    enabled: false
+    ignore: true
+    serviceName: gogs
+
+  - srs:
+    enabled: false
+    ignore: true
+
+  - rr:
+    enabled: false
+    ignore: true
+    serviceName: roadrunner

@@ -1,0 +1,169 @@
+# 通用语言定义(常规的如保存，提交之类)
+common:
+  modifyAccount: Change Password
+  modifyPort: Change Port
+  setPort: Port
+  account: Account
+  password: Password
+  confirm: OK
+  cancel: Cancel
+  modify: Change
+  copyPassword: Copy
+  modifyPassword: Change
+
+  errorPortUsed: The port is occupied.
+  errorPortEmpty: The port cannot be empty.
+  errorUseEmpty: Account or password cannot be empty.
+  errorAccount: Account error(4-8 bits，Start with a letter，Number + Letter).
+  errorPassword: Weak password(6-12 bits，Capital letter + Lowercase letters + Number).
+# 窗体
+window:
+  product: ZenTao
+  title: ZenTao Integrated Environment
+  closeLog: Hide Log
+  openLog: Show Log
+  notInstalled: One touch start
+  installing: Starting...
+  installed:
+      visit: Visit ZenTao
+      stop: Stop ZenTao
+  startLog: Panel Log
+  askPasswordTitle: Password Changed Suggestions
+  askPasswordDesc: The current password strength of your database is weak and risky. It is recommended to modify it. Click Cancel to continue the installation.
+  errorWinTitle: Confirm
+  errorAppLocationPath: Unable to install the startup service, because the current program path contains Chinese and other special characters. The path where the program is located must contain only numbers, uppercase and lowercase letters or underscores. Please modify the path and try again.
+
+  vcAskTitle: Confirm
+  vcAskContent: It is checked that the VC + + running environment is not installed and will not continue to be used. Do you want to install now?
+  errorVCInstall: VC + + running environment installation failed. Do you want to ignore the VC + + environment check and continue running? Confirm to ignore and continue running. If you cancel running, the program will exit automatically.
+
+  apacheUser: Apache User
+  askModifyPasswordRerunTitle: Confirm
+  askModifyRerunContent: When the system is running, changing the password will cause the service to restart. Please confirm whether to change the password and restart?
+  askModifyAuthEnableTitle: Confirm
+  askModifyAuthEnableContnt: When the system is running, enabling or disabling Apache login authentication will cause the service to restart. Please confirm whether to modify and restart?
+
+  closeTipTitle: Close prompt
+  closeTipDesc: After closing, the program will continue to run in the background. You can click system tray display or exit the program.
+  closeTipCheck: Don't show again.
+
+# 托盘
+tray:
+  show: Show
+  quit: Quit
+# 基础信息
+basics:
+  title: ZenTao Integrated Environment ${0}
+  serviceVersion: "${0} Version：${1}"
+  productVersion: ZenTao Version ${0}
+  currentDir: "Current Dir：${0}"
+# 安装消息
+message:
+  startingApp: Starting app ...
+  startAppSuccess: App started successfully.
+  startAppError: The app failed to start. Please try again later.
+
+  stopingApp: Stopping app ...
+  stopAppSuccess: App stopped successfully.
+  stopAppError: App stopped failed, please try again later.
+
+  uninstallingApp: Uninstalling app ...
+  uninstallAppSuccess: App uninstalled successfully.
+  uninstallAppError: App uninstall failed, please try again later.
+
+  errorCommandNot: ${0} Service installation failed. The installation command is not configured.
+  errorPathNotExist: ${0} Service installation failed, service configuration path does not exist.
+  errorConfigTplNotExist: ${0} Service installation failed, template configuration file does not exist.
+  errorConfigNotExist: ${0} Service installation failed, configuration file directory does not exist.
+  errorConfigNoPath: ${0} Installation failed, incomplete configuration.
+
+  installSuccess:  ${0} Service installation succeeded<%，Port：${1}%>.
+  installError: ${0} Service installation failed<%，Port：${1}%>.
+
+  uninstallSuccess: ${0} Service uninstallation succeeded<%，Port：${1}%>.
+  uninstallError: ${0} Service uninstall failed<%，Port：${1}%>.
+
+  startSuccess:  ${0} Service started successfully<%，Port：${1}%>。
+  startError: ${0} Service startup failed<%，Port：${1}%>。
+
+  stopSuccess: ${0} Service stopped successfully<%，Port：${1}%>。
+  stopError: ${0} Service stop failed<%，Port：${1}%>。
+
+  backupStarting: ${0} Backup starting ...
+  backupSuccess: ${0} Backup succeeded, backup to：${1}。
+  backupError: ${0} Backup failed.
+  errorBackupScriptNot: ${0} Backup failed, script not configured.
+  errorBackupPathNot: ${0} Backup failed, file directory is not configured.
+  errorBackupPathNotExist: ${0} Backup failed, file directory does not exist.
+
+  modifingPort: Changing ${0} Port<%，New Port：${1}%>。
+  modifyPortSuccess: ${0} Port modified successfully，New Port：${1}。
+  modifyPortError: ${0} Port modification failed.
+  modifyPortErrorNoRunning: ${0} Port modification failed. The service is not installed or started.
+
+  modifingUser: Changing ${0} User。
+  modifyUserSuccess: ${0} User modified successfully.
+  modifyUserError: ${0} User modification failed.
+  modifyUserErrorNoRunning: ${0} User modification failed. The service is not installed or started.
+
+  errorCommand: ${0} Command execution error, the application cannot be used normally.
+  errorState: ${0} Status error, unable to install service.
+
+  errorUninstallNeedDelay: ${0} The service operation is incomplete and cannot be uninstalled. Please try again later.
+
+xxd:
+  message:
+    startSuccess: ${0} Service started successfully, service address：http://0.0.0.0:${1}。
+    installSuccess: ${0} Service installation succeeded，Port：${1}。
+
+serviceStatus:
+  installIng: Installing...
+  installSuccess: Install success
+  installError: Install failed
+
+  uninstallIng: Uninstalling...
+  uninstallSuccess: Uninstall success
+  uninstallError: Uninstall failed
+
+  stopIng: Stoping...
+  stopSuccess: Stop Success
+  stopError: Stop failed
+
+  startIng: Starting...
+  startSuccess: <%${0}|Start success%>
+  startError: Start failed
+
+  running: <%${0}|Running%>
+  start_pending: Start pending...
+  paused: Suspend
+  stop_pending: Stoping
+  stopped: Stopped
+  unknown: Uninstall
+
+theme:
+  blue: Blue
+  green: Green
+  pink: Pink
+
+menu:
+  viewService: View Service
+  removeService: Uninstall Service
+  sysBackup: System Backup
+  language: Language
+  viewHelp: View Help
+  checkUpdate: Check Update
+  switchTheme: Theme
+
+  langZhCn: 简体中文
+  langZhTw: 繁體中文
+  langEN: English
+
+  visit: Visit
+  viewLog: View Log
+  modifyPort: Change Port
+  modifyUser: Change User
+  install: Install Service
+  stopService: Stop Service
+  startService: Start Service
+  reinstall: Reinstall Service
+  uninstall: Uninstall Service
