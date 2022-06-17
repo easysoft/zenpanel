@@ -45,7 +45,7 @@ ModifyAccount::ModifyAccount(Service *service,QWidget *parent) : ZWidget(parent)
 
     m_btnGroup = new QWidget();
     m_btnLayout = new QHBoxLayout();
-    m_btnLayout->setContentsMargins(0,12,0,5);
+    m_btnLayout->setContentsMargins(ts(0),ts(15),ts(0),ts(5));
     m_btnLayout->setAlignment(Qt::AlignRight);
     m_btnGroup->setLayout(m_btnLayout);
     m_layout->addWidget(m_btnGroup);
@@ -95,15 +95,17 @@ bool ModifyAccount::isConfirm() const
 void ModifyAccount::showError(QString errorDes)
 {
     m_lblError->setText(tlng(errorDes));
+    m_btnLayout->setContentsMargins(ts(0),ts(0),ts(0),ts(5));
 
-    m_btnLayout->setContentsMargins(0,4,0,5);
+    m_lblError->adjustSize();
 }
 
 void ModifyAccount::hideError()
 {
     m_lblError->setText("");
+    m_btnLayout->setContentsMargins(ts(0),ts(15),ts(0),ts(5));
 
-    m_btnLayout->setContentsMargins(0,12,0,5);
+    m_lblError->adjustSize();
 }
 
 void ModifyAccount::confirm()

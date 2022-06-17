@@ -19,9 +19,14 @@ public:
 
     bool hideCloseTip() const;
 
+    bool closeCancle() const;
+
 private:
     bool m_hideCloseTip;
+    bool m_closeCancle;
+
     QPushButton *m_btnYes;
+    QPushButton *m_btnCancel;
     QCheckBox *m_chk;
 
     void createUI();
@@ -29,6 +34,7 @@ private:
 
 private slots:
     void on_yesButton_clicked();
+    void on_noButton_clicked();
 };
 
 #endif // CLOSEDIALOG_H

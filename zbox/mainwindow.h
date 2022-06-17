@@ -107,6 +107,7 @@ private:
 
     bool m_Drag;
     QPoint m_DragPosition;
+    QPoint m_preDragPos;
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);

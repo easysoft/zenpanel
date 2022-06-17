@@ -299,6 +299,26 @@ void MainWindow::adjustAfterLangImpl()
     m_themeWhiteAction->setText(tlng("theme.green"));
     m_themeBlackAction->setText(tlng("theme.pink"));
 
+    //============
+    m_viewServiceBtn->adjustSize();
+    m_removeServiceBtn->adjustSize();
+    m_sysBackupBtn->adjustSize();
+    m_languageBtn->adjustSize();
+    m_viewHelpBtn->adjustSize();
+    m_checkUpdateBtn->adjustSize();
+    m_switchThemeBtn->adjustSize();
+
+    m_langZhCnAction->adjustSize();
+    m_langZhTwAction->adjustSize();
+    m_langENAction->adjustSize();
+
+    m_themeBlueAction->adjustSize();
+    m_themeWhiteAction->adjustSize();
+    m_themeBlackAction->adjustSize();
+
+    m_languageBtn->adjustAfterLang();
+    m_switchThemeBtn->adjustAfterLang();
+
     m_menuWidget->adjustAfterLang();
 
 
@@ -588,6 +608,12 @@ void MainWindow::closeApp()
         dialog->show();
         dialog->exec();
 
+        if(dialog->closeCancle() == true)
+        {
+            delete dialog;
+            return;
+        }
+
         if(dialog->hideCloseTip() == true)
         {
             m_ctr->userConfig()->setBoolean("hideCloseTip",true);
@@ -658,7 +684,7 @@ void MainWindow::onClickViewHelp()
 //    m_menuIcon->setVisible(false);
 //    m_menuWidget->setVisible(false);
 
-    QDesktopServices::openUrl(QUrl("https://www.easycorp.cn/"));
+    QDesktopServices::openUrl(QUrl("https://www.zentao.net/book"));
 }
 
 void MainWindow::onClickUpdateHelp()
@@ -727,6 +753,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
         m_DragPosition = event->globalPos() - this->pos();
         event->accept();
     }
+
+    m_preDragPos = this->pos();
 }
 
 void MainWindow::mouseMoveEvent(QMouseEvent *event)
@@ -740,7 +768,14 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 
 void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-    m_Drag=false;
+     QPoint nowPos = this->pos();
+
+     if(qAbs(m_preDragPos.x() - nowPos.x()) >=4 || qAbs(m_preDragPos.y() - nowPos.y()) >=4)
+     {
+         resized();
+     }
+
+      m_Drag=false;
 }
 
 

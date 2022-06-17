@@ -45,7 +45,7 @@ public:
     void setState(QString &state);
 
     bool canChangePort();
-    InfoResult changePort(QString newPort);
+    virtual InfoResult changePort(QString newPort);
 
     bool enableAuth();
     bool needMakeAuth();

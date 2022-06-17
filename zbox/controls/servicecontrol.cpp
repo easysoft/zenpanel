@@ -79,6 +79,8 @@ void ServiceControl::init()
     m_secondRowLayout->addWidget(preLbl);
     m_lblDesc = new QLabel();
     m_lblDesc->setWordWrap(true);
+    //m_lblDesc = new QTextEdit();
+    m_lblDesc->setAlignment(Qt::AlignVCenter);
     m_secondRowLayout->addWidget(m_lblDesc);
 
     m_firstRowWidget->adjustSize();
@@ -120,7 +122,8 @@ void ServiceControl::adjustAfterLangChanged()
     //QString disText = tlng(m_descTpl);
     disText = disText.replace("${0}",m_service->port());
     m_lblDesc->setText(disText);
-    //m_lblDesc->setText("<p style='line-height:110%'>" + disText + "</p>");
+    //m_lblDesc->setText("<p style='line-height:1px; width:100% ; white-space: pre-wrap; '>" + disText + "</p>");
+    m_lblDesc->adjustSize();
 
     m_btnMore->adjustSize();
     m_btnMore->move(size().width() - m_btnMore->width() - ts(2), ts(3));
@@ -317,8 +320,6 @@ void ServiceControl::refreshState()
     m_lblState->setProperty("iconSize",iconSize);
 
     m_descTpl = descTpl;
-    //QString disText = tlng(descTpl);
-    //disText = disText.replace("${0}",m_oper->port());
 
     MsgResult result;
     result.output = descTpl;
@@ -327,7 +328,8 @@ void ServiceControl::refreshState()
     QString disText = tlng(result);
 
     m_lblDesc->setText(disText);
-    //m_lblDesc->setText("<p style='line-height:200%'>" + disText + "</p>");
+    //m_lblDesc->setText("<p style='line-height:1px; width:100% ; white-space: pre-wrap; '>" + disText + "</p>");
+    m_lblDesc->adjustSize();
 
     m_lblDesc->setProperty("forUse", "lbl" + lblCss);
     m_lblDesc->setProperty("forColor", lblCss);

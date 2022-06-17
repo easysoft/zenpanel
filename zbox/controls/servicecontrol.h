@@ -8,6 +8,7 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QAction>
+#include <QTextEdit>
 
 #include "controller.h"
 #include "base/gscale.h"
@@ -45,6 +46,7 @@ private:
     QPushButton *m_btnMore;
 
     QLabel *m_lblDesc;
+    //QTextEdit *m_lblDesc;
 
     QPushButton *m_menuWidget;
 

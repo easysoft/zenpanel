@@ -7,6 +7,7 @@
 CloseDialog::CloseDialog(QWidget *parent):ZWidget(parent)
 {
     m_hideCloseTip = false;
+    m_closeCancle = false;
 
     preCreate();
     this->setTitle(tlng("window.closeTipTitle"));
@@ -25,6 +26,11 @@ CloseDialog::~CloseDialog()
 bool CloseDialog::hideCloseTip() const
 {
     return m_hideCloseTip;
+}
+
+bool CloseDialog::closeCancle() const
+{
+    return m_closeCancle;
 }
 
 void CloseDialog::createUI()
@@ -50,16 +56,30 @@ void CloseDialog::createUI()
     m_btnYes->setProperty("forUse","yes");
     btnLayout->addWidget(m_btnYes);
 
+    btnLayout->addSpacing(ts(10));
+
+    m_btnCancel = new QPushButton();
+    m_btnCancel->setProperty("forUse","no");
+    m_btnCancel->setText(tlng("common.cancel"));
+    btnLayout->addWidget(m_btnCancel);
+
     this->m_layout->addWidget(btnWidget);
 }
 
 void CloseDialog::connectUI()
 {
     connect(m_btnYes,SIGNAL(clicked()),this,SLOT(on_yesButton_clicked()));
+    connect(m_btnCancel,SIGNAL(clicked()),this,SLOT(on_noButton_clicked()));
 }
 
 void CloseDialog::on_yesButton_clicked()
 {
     this->m_hideCloseTip = m_chk->isChecked();
+    this->hide();
+}
+
+void CloseDialog::on_noButton_clicked()
+{
+    this->m_closeCancle = true;
     this->hide();
 }
