@@ -14,6 +14,7 @@
 #include <QApplication>
 
 #include "base/gbus.h"
+#include "base/gparams.h"
 
 ServiceControl::ServiceControl(Controller *ctr, Service *service, QWidget *parent) : QWidget(parent)
 {
@@ -455,6 +456,9 @@ void ServiceControl::onModifyPortClick()
 
 void ServiceControl::onModifySccess(QString result)
 {
+    //GParams::instance()->addParam(m_service->type().toUpper() + "_ACCOUNT_OLD",m_service->account());
+    //GParams::instance()->addParam(m_service->type().toUpper() + "_PASSWORD_OLD",m_service->password());
+
     refreshState();
     onReinstallClick();
 
@@ -585,6 +589,10 @@ void ServiceControl::onSingleStopFinished(bool result)
 
 void ServiceControl::onSingleReinstallFinished(bool result)
 {
+    //do after account changed
+    GParams::instance()->addParam(m_service->type().toUpper() + "_ACCOUNT_OLD",m_service->account());
+    GParams::instance()->addParam(m_service->type().toUpper() + "_PASSWORD_OLD",m_service->password());
+
     m_ctr->updateAppState();
     m_ctr->onAppStateChanged();
 }

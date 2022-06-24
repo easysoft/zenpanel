@@ -4,7 +4,7 @@ common:
   modifyPort: 修改埠號
   setPort: 設置埠號
   account: 賬戶
-  password: 密碼
+  password: 密碼 
   confirm: 確定
   cancel: 取消
   modify: 修改
@@ -22,14 +22,14 @@ window:
   title: 禪道集成運行環境
   closeLog: 收起日誌
   openLog: 打開日誌
-  notInstalled: 啟動禪道
+  notInstalled: 一鍵啟動
   installing: 正在啟動...
-  installed:
+  installed: 
       visit: 訪問禪道
-      stop: 停止禪道
+      stop: 停止禪道 
   startLog: 面板日誌
   askPasswordTitle: 密碼修改建議
-  askPasswordDesc: 您資料庫當前密碼強度偏弱，存在風險，建議修改。單擊取消繼續安裝。
+  askPasswordDesc: 您資料庫當前密碼強度偏弱，存在風險，建議修改。單擊取消繼續安裝。  
   errorWinTitle: 確認
   errorAppLocationPath: 無法安裝啟動服務，因為當前程序所在路徑包含中文等特殊字符。程序所在路徑必須僅包含數字、大小寫字母或下劃線，請修改路徑後重試。
 
@@ -45,7 +45,7 @@ window:
 
   closeTipTitle: 關閉提示
   closeTipDesc: 關閉後程式會在後臺繼續運行，可按一下系統託盤顯示或者退出程式。
-  closeTipCheck: 下次不再詢問。
+  closeTipCheck: 下次不在詢問。
 
 # 托盘
 tray:
@@ -109,9 +109,9 @@ message:
   errorCommand: ${0} 命令執行錯誤，應用不能正常使用。
   errorState: ${0} 狀態錯誤，無法安裝服務。
 
-  errorUninstallNeedDelay: ${0} 服務操作未完成，無法卸載，請稍後重試。
+  errorUninstallNeedDelay: ${0} 服務操作未完成，無法卸載，請稍後重試。 
 
-xxd:
+xxd: 
   message:
     startSuccess: ${0} 服務啟動成功，服務地址：http://0.0.0.0:${1}。
     installSuccess: ${0} 服務安裝成功，埠號：${1}。
@@ -128,7 +128,7 @@ serviceStatus:
   stopIng: 停止中...
   stopSuccess: 停止成功
   stopError: 停止失敗
-
+  
   startIng: 啟動中...
   startSuccess: <%${0}|啟動成功%>
   startError: 啟動失敗
@@ -138,7 +138,7 @@ serviceStatus:
   paused: 暫停
   stop_pending: 停止中
   stopped: 已停止
-  unknown: 未安裝
+  unknown: 未安裝 
 
 theme:
   blue: 藍色
