@@ -683,8 +683,8 @@ void MainWindow::onClickViewHelp()
 {
 //    m_menuIcon->setVisible(false);
 //    m_menuWidget->setVisible(false);
-
-    QDesktopServices::openUrl(QUrl("https://www.zentao.net/book"));
+    Yaml2Stream* ini_config = m_ctr->iniConfig();
+    QDesktopServices::openUrl(QUrl(ini_config->getString("app.help.url", "http://www.zenpanel.cc/")));
 }
 
 void MainWindow::onClickUpdateHelp()
@@ -692,7 +692,8 @@ void MainWindow::onClickUpdateHelp()
 //    m_menuIcon->setVisible(false);
 //    m_menuWidget->setVisible(false);
 
-    QDesktopServices::openUrl(QUrl("https://www.zentao.net/"));
+    Yaml2Stream* ini_config = m_ctr->iniConfig();
+    QDesktopServices::openUrl(QUrl(ini_config->getString("app.update.url", "http://www.zenpanel.cc/")));
 }
 
 void MainWindow::clickVisit()

@@ -21,6 +21,10 @@ app:
     enabled: true
     script: "%PHP_EXE% %ZENTAO_PATH%bin/ztcli http://127.0.0.1:%APACHE_PORT%/backup-backup.html"
     path: "%ZENTAO_PATH%tmp/backup/"
+  help:
+    url: "http://www.zenpanel.cc/"
+  update:
+    url: "http://www.zenpanel.cc/"
 
   entriesxx:
     - #xxb

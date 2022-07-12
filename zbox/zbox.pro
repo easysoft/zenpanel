@@ -129,3 +129,4 @@ DEPENDPATH += $$PWD/../yaml
 include(./qtsingleapplication/qtsingleapplication.pri)
 
 RESOURCES +=
+
