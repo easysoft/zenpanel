@@ -226,6 +226,10 @@ QScrollBar::sub-page:vertical{
 }
 
 /* 弹出菜单样式 ------------------------------------------------- */
+ZPopupButton {
+    text-align: left;
+}
+
 QWidget[forRadius='nestedMenu']{
     border-radius: 1px;
 }

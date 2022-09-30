@@ -10,12 +10,12 @@ public:
     static QString TOTAL_INSTALLING;
     static QString TOTAL_INSTALLED;
 
-    static QString SERVICE_START_PENDING;
-    static QString SERVICE_RUNNING;
-    static QString SERVICE_PAUSED;
-    static QString SERVICE_STOP_PENDING;
-    static QString SERVICE_STOPPED;
-    static QString SERVICE_UNKNOWN;
+    static QString U_SERVICE_START_PENDING;
+    static QString U_SERVICE_RUNNING;
+    static QString U_SERVICE_PAUSED;
+    static QString U_SERVICE_STOP_PENDING;
+    static QString U_SERVICE_STOPPED;
+    static QString U_SERVICE_UNKNOWN;
 
     static QString STATE_INSTALL_ING;
     static QString STATE_INSTALL_SUCCESS;

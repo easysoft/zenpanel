@@ -122,12 +122,12 @@ QLabel[forUse='lblwarning']{
 
 QLabel[forLang='en']{
     font-size: 10px;
+    line-height: 100%;
 }
 
 QLabel[forLang='en']{
     font-size: 10px;
 }
-
 
 QLabel[forUse='iconsuccess']{
     font-family:iconfont-zentao;
@@ -247,7 +247,7 @@ QWidget[forUse='customMenu'] QPushButton{
     color: #ffffff;
     font-size: 12px;
     background-color:transparent;
-    padding: 4px 20px;
+    padding: 4px 15px;
     border: none;
 }
 
@@ -338,6 +338,64 @@ QPushButton[forUse='no'] {
     border-radius: 4px;
 }
 
+QWidget[forUse='quickon'] {
+    color: #ffffff;
+    font-size: 14px;
+    background-color: transparent;
+    border: 1px solid #ffffff;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+/* Combox 样式 */
+QComboBox 
+{
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 4px;
+    padding-right: 20px;
+    border: 1px solid #128FDF;
+    border-radius: 5px;
+    color: #333333;
+    background-color: #FFFFFF;
+    font-family: "Microsoft YaHei";
+    font-size: 17px;
+    width: 127px;
+    height: 31px;
+}
+
+QComboBox:on
+{
+    padding-top: 5px;
+    padding-left: 8px;
+}
+
+/*
+QComboBox::down-arrow
+{
+    background-color: transparent;
+    background-repeat: no-repeat;
+}
+
+QComboBox::down-arrow:on, QComboBox::down-arrow:hover {
+    top: 3px;
+    left: 3px;
+
+    background-color: transparent;
+    background-repeat: no-repeat;
+}
+*/
+
+QComboBox QAbstractItemView
+{
+    padding: 2px 0px 1px 0px;
+    border: 1px solid #F0F0F5;
+    border-radius: 0px;
+    color: #333333;
+    background-color: #FFFFFF;
+    selection-color: #333333;
+    selection-background-color: #A2E1FF;
+}
 
 /* 托盘菜单样式 */
 QMenu[forUse='tray'] { 

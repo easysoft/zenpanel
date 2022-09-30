@@ -80,7 +80,7 @@ void MysqlService::extractParamValues()
     GParams::instance()->addParam(this->type().toUpper() + "_ACCOUNT",account());
     GParams::instance()->addParam(this->type().toUpper() + "_PASSWORD",password());
 
-    if(m_state == ConstUtil::SERVICE_UNKNOWN)
+    if(m_state == ConstUtil::U_SERVICE_UNKNOWN)
     {
         QString userAccount = m_ctr->customStrParam(this->type()+".account");
         QString userPassword = m_ctr->customStrParam(this->type() + ".password");

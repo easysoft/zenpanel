@@ -23,6 +23,8 @@
 #include "base/zoffsetmenu.h"
 #include "base/zpopupmenu.h"
 
+#include "services/quickonservice.h"
+
 class Controller;
 
 class MainWindow : public QMainWindow,GScale,GLang

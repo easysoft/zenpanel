@@ -3,7 +3,7 @@ QT       += core gui
 RC_FILE += uac.rc
 
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets network
 
 CONFIG += c++11
 
@@ -58,6 +58,7 @@ SOURCES += \
     services/groupservice.cpp \
     services/mysqlservice.cpp \
     services/productservice.cpp \
+    services/quickonservice.cpp \
     traymanager.cpp \
     utils/constutil.cpp \
     utils/envUtil.cpp \
@@ -106,6 +107,7 @@ HEADERS += \
     services/groupservice.h \
     services/mysqlservice.h \
     services/productservice.h \
+    services/quickonservice.h \
     traymanager.h \
     utils/constutil.h \
     utils/envutil.h \
@@ -120,8 +122,18 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../yaml/release/ -lyaml
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../yaml/debug/ -lyaml
+win32:CONFIG(release, debug|release): LIBS += \
+    -L$$OUT_PWD/../yaml/release/ \
+    -lyaml \
+    -lAdvapi32 \
+    -lShell32 \
+    -lPsapi
+else:win32:CONFIG(debug, debug|release): LIBS += \
+    -L$$OUT_PWD/../yaml/debug/ \
+    -lyaml \
+    -lAdvapi32 \
+    -lShell32 \
+    -lPsapi
 
 INCLUDEPATH += $$PWD/../yaml
 DEPENDPATH += $$PWD/../yaml
@@ -129,4 +141,3 @@ DEPENDPATH += $$PWD/../yaml
 include(./qtsingleapplication/qtsingleapplication.pri)
 
 RESOURCES +=
-

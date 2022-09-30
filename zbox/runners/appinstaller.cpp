@@ -87,9 +87,9 @@ void AppInstaller::startApplicationImpl()
         else
         {
             QString serviceState = service->queryState();
-            if(serviceState == ConstUtil::SERVICE_PAUSED ||
-                    serviceState == ConstUtil::SERVICE_STOP_PENDING ||
-                    serviceState == ConstUtil::SERVICE_START_PENDING)
+            if(serviceState == ConstUtil::U_SERVICE_PAUSED ||
+                    serviceState == ConstUtil::U_SERVICE_STOP_PENDING ||
+                    serviceState == ConstUtil::U_SERVICE_START_PENDING)
             {
                 service->killService(this);
                 sleepBetween();
@@ -99,7 +99,7 @@ void AppInstaller::startApplicationImpl()
         }
     }
 
-    bool result = isUnifiedState(ConstUtil::SERVICE_RUNNING);
+    bool result = isUnifiedState(ConstUtil::U_SERVICE_RUNNING);
 
     if(result == true)
         toSend("message.startAppSuccess");
@@ -123,18 +123,18 @@ void AppInstaller::stopApplicationImpl()
         QString serviceState = service->queryState();
         service->setState(serviceState);
 
-        if(serviceState == ConstUtil::SERVICE_RUNNING)
+        if(serviceState == ConstUtil::U_SERVICE_RUNNING)
         {
             service->stopService(this);
         }
-        else if(serviceState == ConstUtil::SERVICE_UNKNOWN ||
-                serviceState == ConstUtil::SERVICE_STOPPED)
+        else if(serviceState == ConstUtil::U_SERVICE_UNKNOWN ||
+                serviceState == ConstUtil::U_SERVICE_STOPPED)
         {
             continue;
         }
-        else if(serviceState == ConstUtil::SERVICE_START_PENDING ||
-                serviceState == ConstUtil::SERVICE_STOP_PENDING ||
-                serviceState == ConstUtil::SERVICE_PAUSED)
+        else if(serviceState == ConstUtil::U_SERVICE_START_PENDING ||
+                serviceState == ConstUtil::U_SERVICE_STOP_PENDING ||
+                serviceState == ConstUtil::U_SERVICE_PAUSED)
         {
             service->killService(this);
         }
@@ -147,10 +147,10 @@ void AppInstaller::stopApplicationImpl()
             continue;
 
         QString state = m_servieList->at(i)->state();
-        if(state == ConstUtil::SERVICE_RUNNING ||
-                state == ConstUtil::SERVICE_PAUSED ||
-                state == ConstUtil::SERVICE_START_PENDING ||
-                state == ConstUtil::SERVICE_STOP_PENDING)
+        if(state == ConstUtil::U_SERVICE_RUNNING ||
+                state == ConstUtil::U_SERVICE_PAUSED ||
+                state == ConstUtil::U_SERVICE_START_PENDING ||
+                state == ConstUtil::U_SERVICE_STOP_PENDING)
         {
             result = false;
             break;
@@ -179,29 +179,29 @@ void AppInstaller::uninstallApplicationImpl()
         QString serviceState = service->queryState();
         service->setState(serviceState);
 
-        if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+        if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
         {
             continue;
         }
-        else if(serviceState == ConstUtil::SERVICE_STOPPED)
+        else if(serviceState == ConstUtil::U_SERVICE_STOPPED)
         {
             service->uninstallService(this);
         }
-        else if(serviceState == ConstUtil::SERVICE_RUNNING)
+        else if(serviceState == ConstUtil::U_SERVICE_RUNNING)
         {
             service->stopService(this);
             sleepBetween();
             service->uninstallService(this);
         }
-        else if(serviceState == ConstUtil::SERVICE_START_PENDING ||
-                serviceState == ConstUtil::SERVICE_STOP_PENDING ||
-                serviceState == ConstUtil::SERVICE_PAUSED)
+        else if(serviceState == ConstUtil::U_SERVICE_START_PENDING ||
+                serviceState == ConstUtil::U_SERVICE_STOP_PENDING ||
+                serviceState == ConstUtil::U_SERVICE_PAUSED)
         {
             service->killService(this);
         }
     }
 
-    bool result = isUnifiedState(ConstUtil::SERVICE_UNKNOWN);
+    bool result = isUnifiedState(ConstUtil::U_SERVICE_UNKNOWN);
 
     if(result == true)
         toSend("message.uninstallAppSuccess");

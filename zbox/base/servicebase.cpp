@@ -142,6 +142,11 @@ bool ServiceBase::ignore()
     return m_config->getboolean("ignore",false);
 }
 
+bool ServiceBase::manual()
+{
+    return m_config->getboolean("manual",false);
+}
+
 QString ServiceBase::account()
 {
     QString configAccount = m_config->getString("account");
@@ -191,7 +196,7 @@ InfoResult ServiceBase::changePort(QString newPort)
 
 bool ServiceBase::enableAuth()
 {
-    return m_ctr->customBoolParam(this->type() + ".enableAuth",true);
+    return m_ctr->customBoolParam(this->type() + ".enableAuth",false);
 }
 
 bool ServiceBase::needMakeAuth()
@@ -448,7 +453,7 @@ QString ServiceBase::queryState()
 {
     QString nowServiceName = serviceName();
     if(nowServiceName == "false")
-        return  ConstUtil::SERVICE_RUNNING;
+        return  ConstUtil::U_SERVICE_RUNNING;
     else
         return  ProcessUtil::serviceState(nowServiceName);
 }

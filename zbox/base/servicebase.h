@@ -37,6 +37,7 @@ public:
     QString vcRumtime();
 
     bool ignore();
+    bool manual();
 
     virtual QString account();
     virtual QString password();

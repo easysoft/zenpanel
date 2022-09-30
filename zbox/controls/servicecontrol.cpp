@@ -298,7 +298,7 @@ void ServiceControl::refreshState()
     {
         QString serviceState = m_service->queryState();
         descTpl = "serviceStatus." + serviceState.toLower();
-        if(serviceState == ConstUtil::SERVICE_RUNNING)
+        if(serviceState == ConstUtil::U_SERVICE_RUNNING)
         {
             icon = QChar(0xe742);
             iconCss = "success";
@@ -369,7 +369,7 @@ void ServiceControl::refreshMenu()
     if(m_service->ignore() == true && isPreInstalled == false)
         return;
 
-    if(serviceState == ConstUtil::SERVICE_RUNNING)
+    if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {
         m_visitAction->setEnabled(true);
         m_viewLogAction->setEnabled(true);
@@ -381,7 +381,7 @@ void ServiceControl::refreshMenu()
         m_uninstallAction->setEnabled(true);
         m_startServiceAction->setEnabled(false);
     }
-    else if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    else if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         m_visitAction->setEnabled(false);
         m_viewLogAction->setEnabled(false);
@@ -393,7 +393,7 @@ void ServiceControl::refreshMenu()
         m_uninstallAction->setEnabled(false);
         m_startServiceAction->setEnabled(false);
     }
-    else if(serviceState == ConstUtil::SERVICE_PAUSED)
+    else if(serviceState == ConstUtil::U_SERVICE_PAUSED)
     {
         m_visitAction->setEnabled(false);
         m_viewLogAction->setEnabled(true);
@@ -405,7 +405,7 @@ void ServiceControl::refreshMenu()
         m_uninstallAction->setEnabled(true);
         m_startServiceAction->setEnabled(false);
     }
-    else if(serviceState == ConstUtil::SERVICE_STOPPED)
+    else if(serviceState == ConstUtil::U_SERVICE_STOPPED)
     {
         m_visitAction->setEnabled(false);
         m_viewLogAction->setEnabled(true);
@@ -417,8 +417,8 @@ void ServiceControl::refreshMenu()
         m_uninstallAction->setEnabled(true);
         m_startServiceAction->setEnabled(true);
     }
-    else if(serviceState == ConstUtil::SERVICE_STOP_PENDING ||
-            serviceState == ConstUtil::SERVICE_START_PENDING)
+    else if(serviceState == ConstUtil::U_SERVICE_STOP_PENDING ||
+            serviceState == ConstUtil::U_SERVICE_START_PENDING)
     {
         m_visitAction->setEnabled(false);
         m_viewLogAction->setEnabled(false);
@@ -478,7 +478,7 @@ void ServiceControl::onModifyAccountClick()
     }
 
     QString stata = m_service->queryState();
-    if(stata == ConstUtil::SERVICE_RUNNING && m_service->enableAuth() == true)
+    if(stata == ConstUtil::U_SERVICE_RUNNING && m_service->enableAuth() == true)
     {
         AskConfirm *confirm = new AskConfirm(tlng("window.askModifyPasswordRerunTitle"),tlng("window.askModifyRerunContent"));
         confirm->show();

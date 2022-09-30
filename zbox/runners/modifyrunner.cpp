@@ -76,7 +76,7 @@ void ModifyRunner::startConfigImpl()
 void ModifyRunner::startPortImpl()
 {
     QString serviceState = m_service->queryState();
-    if(serviceState != ConstUtil::SERVICE_RUNNING)
+    if(serviceState != ConstUtil::U_SERVICE_RUNNING)
     {
         toSend(m_service->getErrorMsg("message.modifyPortErrorNoRunning",m_service->title(),m_newPort));
         return;
@@ -114,7 +114,7 @@ void ModifyRunner::startPortImpl()
 void ModifyRunner::startUserImpl()
 {
     QString serviceState = m_service->queryState();
-    if(serviceState != ConstUtil::SERVICE_RUNNING)
+    if(serviceState != ConstUtil::U_SERVICE_RUNNING)
     {
         toSend(m_service->getErrorMsg("message.modifyUserErrorNoRunning",m_service->title(),m_service->port()));
         return;

@@ -94,7 +94,7 @@ void ApacheSetting::settingChanged(int state)
     m_appacheService->extractParamValues();
 
     QString stata = m_appacheService->queryState();
-    if(stata == ConstUtil::SERVICE_RUNNING)
+    if(stata == ConstUtil::U_SERVICE_RUNNING)
     {
         AskConfirm *confirm = new AskConfirm(tlng("window.askModifyAuthEnableTitle"),tlng("window.askModifyAuthEnableContnt"));
         confirm->show();
@@ -138,7 +138,7 @@ void ApacheSetting::modifyPassword()
     }
 
     QString stata = m_appacheService->queryState();
-    if(stata == ConstUtil::SERVICE_RUNNING && m_appacheService->enableAuth() == true)
+    if(stata == ConstUtil::U_SERVICE_RUNNING && m_appacheService->enableAuth() == true)
     {
         AskConfirm *confirm = new AskConfirm(tlng("window.askModifyPasswordRerunTitle"),tlng("window.askModifyRerunContent"));
         confirm->show();

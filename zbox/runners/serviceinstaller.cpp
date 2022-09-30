@@ -45,7 +45,7 @@ void ServiceInstaller::installSingleServiceImpl()
 
     bool result = true;
 
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         result = m_service->installService(this);
     }
@@ -58,11 +58,11 @@ void ServiceInstaller::reInstallSingleServiceImpl()
     QString serviceState = m_service->queryState();
     m_service->setState(serviceState);
 
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         m_service->installService(this);
     }
-    else if(serviceState == ConstUtil::SERVICE_RUNNING)
+    else if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {
         m_service->stopService(this);
         sleepBetween();
@@ -70,15 +70,15 @@ void ServiceInstaller::reInstallSingleServiceImpl()
         sleepBetween();
         m_service->installService(this);
     }
-    if(serviceState == ConstUtil::SERVICE_PAUSED ||
-            serviceState == ConstUtil::SERVICE_START_PENDING ||
-            serviceState == ConstUtil::SERVICE_STOP_PENDING)
+    if(serviceState == ConstUtil::U_SERVICE_PAUSED ||
+            serviceState == ConstUtil::U_SERVICE_START_PENDING ||
+            serviceState == ConstUtil::U_SERVICE_STOP_PENDING)
     {
         m_service->killService(this);
         sleepBetween();
         m_service->installService(this);
     }
-    else if(serviceState == ConstUtil::SERVICE_STOPPED)
+    else if(serviceState == ConstUtil::U_SERVICE_STOPPED)
     {
         m_service->uninstallService(this);
         sleepBetween();
@@ -93,18 +93,18 @@ void ServiceInstaller::stopSingleSerivceImpl()
     QString serviceState = m_service->queryState();
     m_service->setState(serviceState);
 
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN ||
-            serviceState == ConstUtil::SERVICE_STOPPED)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN ||
+            serviceState == ConstUtil::U_SERVICE_STOPPED)
     {
         //No other processing is required
     }
-    else if(serviceState == ConstUtil::SERVICE_RUNNING)
+    else if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {
         m_service->stopService(this);
     }
-    else if(serviceState == ConstUtil::SERVICE_PAUSED ||
-            serviceState == ConstUtil::SERVICE_START_PENDING ||
-            serviceState == ConstUtil::SERVICE_STOP_PENDING)
+    else if(serviceState == ConstUtil::U_SERVICE_PAUSED ||
+            serviceState == ConstUtil::U_SERVICE_START_PENDING ||
+            serviceState == ConstUtil::U_SERVICE_STOP_PENDING)
     {
         m_service->killService(this);
     }
@@ -127,23 +127,23 @@ void ServiceInstaller::uninstallSingleServiceImpl()
     QString serviceState = m_service->queryState();
     m_service->setState(serviceState);
 
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         //No other processing is required
     }
-    else if(serviceState == ConstUtil::SERVICE_RUNNING)
+    else if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {
         m_service->stopService(this);
         sleepBetween();
         m_service->uninstallService(this);
     }
-    else if(serviceState == ConstUtil::SERVICE_STOPPED)
+    else if(serviceState == ConstUtil::U_SERVICE_STOPPED)
     {
         m_service->uninstallService(this);
     }
-    else if(serviceState == ConstUtil::SERVICE_PAUSED ||
-            serviceState == ConstUtil::SERVICE_START_PENDING ||
-            serviceState == ConstUtil::SERVICE_STOP_PENDING)
+    else if(serviceState == ConstUtil::U_SERVICE_PAUSED ||
+            serviceState == ConstUtil::U_SERVICE_START_PENDING ||
+            serviceState == ConstUtil::U_SERVICE_STOP_PENDING)
     {
         m_service->killService(this);
     }

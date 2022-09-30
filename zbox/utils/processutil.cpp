@@ -13,6 +13,7 @@ InfoResult ProcessUtil::excuteCommand(QString command,QStringList params)
     bool ret;
     QProcess process;
 
+    printf("&&&&&&&&&& %s\n", command.toStdString().c_str());
     if(params.length() >0)
         process.start(command,params);
     else
@@ -54,7 +55,7 @@ QString ProcessUtil::serviceState(QString serviceName)
     InfoResult result = excuteCommand("sc query " + serviceName);
 
     if(result.error == true)
-        return ConstUtil::SERVICE_UNKNOWN;
+        return ConstUtil::U_SERVICE_UNKNOWN;
 
     QStringList msgList = result.output.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
 
@@ -62,18 +63,18 @@ QString ProcessUtil::serviceState(QString serviceName)
     if(msgList.length() >= 3)
     {
         QString statusMsgStr = msgList[2];
-        if(statusMsgStr.indexOf(ConstUtil::SERVICE_START_PENDING) > 0)  //启动中
-            status = ConstUtil::SERVICE_START_PENDING;
-        else if(statusMsgStr.indexOf(ConstUtil::SERVICE_RUNNING) > 0)   //已启动
-            status = ConstUtil::SERVICE_RUNNING;
-        else if(statusMsgStr.indexOf(ConstUtil::SERVICE_PAUSED) > 0)        //暂停
-            status = ConstUtil::SERVICE_PAUSED;
-        else if(statusMsgStr.indexOf(ConstUtil::SERVICE_STOP_PENDING) > 0)  //停止中
-            status = ConstUtil::SERVICE_STOP_PENDING;
-        else if(statusMsgStr.indexOf(ConstUtil::SERVICE_STOPPED) > 0)   //已停止
-            status = ConstUtil::SERVICE_STOPPED;
+        if(statusMsgStr.indexOf(ConstUtil::U_SERVICE_START_PENDING) > 0)  //启动中
+            status = ConstUtil::U_SERVICE_START_PENDING;
+        else if(statusMsgStr.indexOf(ConstUtil::U_SERVICE_RUNNING) > 0)   //已启动
+            status = ConstUtil::U_SERVICE_RUNNING;
+        else if(statusMsgStr.indexOf(ConstUtil::U_SERVICE_PAUSED) > 0)        //暂停
+            status = ConstUtil::U_SERVICE_PAUSED;
+        else if(statusMsgStr.indexOf(ConstUtil::U_SERVICE_STOP_PENDING) > 0)  //停止中
+            status = ConstUtil::U_SERVICE_STOP_PENDING;
+        else if(statusMsgStr.indexOf(ConstUtil::U_SERVICE_STOPPED) > 0)   //已停止
+            status = ConstUtil::U_SERVICE_STOPPED;
         else if(statusMsgStr.indexOf("1060") > 0)
-            status = ConstUtil::SERVICE_UNKNOWN;
+            status = ConstUtil::U_SERVICE_UNKNOWN;
     }
 
     return status;

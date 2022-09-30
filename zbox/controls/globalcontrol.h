@@ -4,7 +4,11 @@
 #include <QWidget>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
+#include <QComboBox>
 
 #include "controller.h"
 #include "base/gscale.h"
@@ -28,12 +32,23 @@ private:
     QPushButton *m_btnIngInstall;
     QPushButton *m_btnUninstall;
     QPushButton *m_btnVisit;
+    QPushButton *m_btnVisitQuickOn;
+
+    QWidget     *m_QuickOnWidget;
+    QVBoxLayout *m_QuickOnLayout;
+    QLabel      *m_QuickOnTitle;
+    QHBoxLayout *m_QuickOnDomainLayout;
+    QLineEdit   *m_QuickOnDomain0;
+    QLabel      *m_QuickOnDot;
+    QComboBox   *m_QuickOnDomain1;
+    QPushButton *m_QuickOnSave;
 
     void preCreateUI();
 
     void createNotInstallUI();
     void createInstallingUI();
     void createInstalledUI();
+    void createQuickOnUI();
 
 private slots:
     void sendOneSetup();

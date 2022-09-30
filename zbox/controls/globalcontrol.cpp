@@ -21,7 +21,6 @@ void GlobalControl::stateChanged()
 
     if(appRunState == ConstUtil::TOTAL_NOTINSTALLED)
     {
-
         m_btnNotInstall->show();
         m_btnIngInstall->hide();
         m_btnVisit->hide();
@@ -48,6 +47,7 @@ void GlobalControl::stateChanged()
 void GlobalControl::adjustAfterChanged()
 {
     m_btnVisit->setMinimumWidth(0);
+    m_btnVisitQuickOn->setMinimumWidth(0);
     m_btnUninstall->setMinimumWidth(0);
 
     m_btnNotInstall->setMinimumWidth(0);
@@ -57,6 +57,7 @@ void GlobalControl::adjustAfterChanged()
     m_btnIngInstall->setText(tlng("window.installing"));
 
     m_btnVisit->setText(tlng("window.installed.visit"));
+    m_btnVisitQuickOn->setText(tlng("window.installed.visitquickon"));
     m_btnUninstall->setText(tlng("window.installed.stop"));
 
     m_btnVisit->adjustSize();
@@ -94,6 +95,7 @@ void GlobalControl::preCreateUI()
     createNotInstallUI();
     createInstallingUI();
     createInstalledUI();
+//    createQuickOnUI();
 
     this->show();
 }
@@ -127,11 +129,51 @@ void GlobalControl::createInstalledUI()
     m_btnVisit->setProperty("forUse","uninstallBtn");
     m_mainLayout->addWidget(m_btnVisit);
 
+    m_btnVisitQuickOn = new QPushButton();
+    m_btnVisitQuickOn->setProperty("forUse","uninstallBtn");
+    m_mainLayout->addWidget(m_btnVisitQuickOn);
+
     m_btnUninstall->setCursor(Qt::PointingHandCursor);
     m_btnVisit->setCursor(Qt::PointingHandCursor);
 
+    m_btnVisit->hide();
+
     connect(m_btnUninstall, SIGNAL(clicked()), this, SLOT(sendOneStop()));
     connect(m_btnVisit, SIGNAL(clicked()), this, SLOT(sendVisit()));
+}
+
+void GlobalControl::createQuickOnUI()
+{
+    m_QuickOnLayout = new QVBoxLayout;
+    m_QuickOnWidget = new QWidget(this);
+    m_QuickOnWidget->setProperty("forUse","quickon");
+    m_QuickOnTitle = new QLabel(m_QuickOnWidget);
+    
+    m_QuickOnDomainLayout = new QHBoxLayout(m_QuickOnWidget);
+    m_QuickOnDomain0 = new QLineEdit(m_QuickOnWidget);
+    m_QuickOnDot = new QLabel(m_QuickOnWidget);
+    m_QuickOnDomain1 = new QComboBox(m_QuickOnWidget);
+
+    m_QuickOnSave = new QPushButton(m_QuickOnWidget);
+    m_QuickOnSave->setProperty("forUse","uninstallBtn");
+    m_QuickOnSave->setCursor(Qt::PointingHandCursor);
+
+    m_QuickOnLayout->addWidget(m_QuickOnTitle);
+    
+    m_QuickOnDomainLayout->addWidget(m_QuickOnDomain0);
+    m_QuickOnDomainLayout->addWidget(m_QuickOnDot);
+    m_QuickOnDomainLayout->addWidget(m_QuickOnDomain1);
+    m_QuickOnLayout->addLayout(m_QuickOnDomainLayout);
+    
+    m_QuickOnLayout->addWidget(m_QuickOnSave);
+
+    m_QuickOnLayout->setStretchFactor(m_QuickOnTitle, 1);
+    m_QuickOnLayout->setStretchFactor(m_QuickOnDomainLayout, 3);
+    m_QuickOnLayout->setStretchFactor(m_QuickOnSave, 2);
+
+    m_QuickOnWidget->setLayout(m_QuickOnLayout);
+
+    m_mainLayout->addWidget(m_QuickOnWidget);
 }
 
 void GlobalControl::sendOneSetup()

@@ -3,6 +3,7 @@
 #include "qyaml.h"
 #include "services/apacheservice.h"
 #include "services/mysqlservice.h"
+#include "services/quickonservice.h"
 #include "base/servicebase.h"
 #include "utils/yamlutil.h"
 #include "configs/yaml2stream.h"
@@ -52,12 +53,12 @@ bool GroupService::isWindowService()
 QString GroupService::queryState()
 {
     QList<QString> stateIndexs = QList<QString>()
-            <<ConstUtil::SERVICE_START_PENDING
-            <<ConstUtil::SERVICE_RUNNING
-            <<ConstUtil::SERVICE_PAUSED
-            <<ConstUtil::SERVICE_STOP_PENDING
-            <<ConstUtil::SERVICE_STOPPED
-            <<ConstUtil::SERVICE_UNKNOWN;
+            <<ConstUtil::U_SERVICE_START_PENDING
+            <<ConstUtil::U_SERVICE_RUNNING
+            <<ConstUtil::U_SERVICE_PAUSED
+            <<ConstUtil::U_SERVICE_STOP_PENDING
+            <<ConstUtil::U_SERVICE_STOPPED
+            <<ConstUtil::U_SERVICE_UNKNOWN;
     int lastIndex = 0;
 
     foreach(Service *service,m_members)
@@ -110,7 +111,7 @@ bool GroupService::installServiceImpl(SendProxy *proxy)
     SendProxy *ignoreProxy = new SendProxy();
 
     QString selfServiceState = this->state();
-    if(selfServiceState != ConstUtil::SERVICE_UNKNOWN)
+    if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
         return false;
     }
@@ -118,7 +119,7 @@ bool GroupService::installServiceImpl(SendProxy *proxy)
     foreach(Service *service,m_members)
     {
         QString serviceState = service->queryState();
-        if(serviceState != ConstUtil::SERVICE_UNKNOWN)
+        if(serviceState != ConstUtil::U_SERVICE_UNKNOWN)
             service->killService(ignoreProxy);
 
         sleepBetween();
@@ -137,7 +138,7 @@ bool GroupService::uninstallServiceImpl(SendProxy *proxy)
     {
         QString serviceState = service->queryState();
 
-        if(serviceState == ConstUtil::SERVICE_UNKNOWN) continue;
+        if(serviceState == ConstUtil::U_SERVICE_UNKNOWN) continue;
 
         if(!service->killService(proxy))
             return false;
@@ -151,7 +152,7 @@ bool GroupService::startServiceImpl(SendProxy *proxy)
 {
     SendProxy *ignoreProxy = new SendProxy();
     QString serviceState = this->state();
-    if(serviceState != ConstUtil::SERVICE_STOPPED)
+    if(serviceState != ConstUtil::U_SERVICE_STOPPED)
 
     {
         return false;
@@ -174,7 +175,7 @@ bool GroupService::stopServiceImpl(SendProxy *proxy)
     foreach(Service *service,m_members)
     {
         QString serviceState = service->queryState();
-        if(serviceState == ConstUtil::SERVICE_RUNNING)
+        if(serviceState == ConstUtil::U_SERVICE_RUNNING)
         {
 
         }
@@ -256,6 +257,12 @@ void GroupService::createMembers()
         else if(key == "mysql")
         {
             MysqlService *service = new MysqlService(m_ctr,config,key);
+            service->setParent(this);
+            m_members.append(service);
+        }
+        else if (key == "quickon")
+        {
+            QuickOnService *service = new QuickOnService(m_ctr,config,key);
             service->setParent(this);
             m_members.append(service);
         }

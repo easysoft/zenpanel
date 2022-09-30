@@ -4,12 +4,12 @@ QString ConstUtil::TOTAL_NOTINSTALLED = "notInstalled";
 QString ConstUtil::TOTAL_INSTALLING = "installing";
 QString ConstUtil::TOTAL_INSTALLED = "installed";
 
-QString ConstUtil::SERVICE_START_PENDING = "START_PENDING";
-QString ConstUtil::SERVICE_RUNNING = "RUNNING";
-QString ConstUtil::SERVICE_PAUSED = "PAUSED";
-QString ConstUtil::SERVICE_STOP_PENDING = "STOP_PENDING";
-QString ConstUtil::SERVICE_STOPPED = "STOPPED";
-QString ConstUtil::SERVICE_UNKNOWN = "UNKNOWN";
+QString ConstUtil::U_SERVICE_START_PENDING = "START_PENDING";
+QString ConstUtil::U_SERVICE_RUNNING = "RUNNING";
+QString ConstUtil::U_SERVICE_PAUSED = "PAUSED";
+QString ConstUtil::U_SERVICE_STOP_PENDING = "STOP_PENDING";
+QString ConstUtil::U_SERVICE_STOPPED = "STOPPED";
+QString ConstUtil::U_SERVICE_UNKNOWN = "UNKNOWN";
 
 QString ConstUtil::STATE_INSTALL_ING = "install_ing";
 QString ConstUtil::STATE_INSTALL_SUCCESS = "install_success";

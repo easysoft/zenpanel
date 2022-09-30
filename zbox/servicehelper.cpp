@@ -12,7 +12,7 @@
 
 void ServiceHelper::autoSelectPort(Service *service,YamlStream *userConfig)
 {
-    if(service->state() != ConstUtil::SERVICE_UNKNOWN) return;
+    if(service->state() != ConstUtil::U_SERVICE_UNKNOWN) return;
     if(service->fixPort() == true) return;
 
     QString port = service->port();
@@ -84,7 +84,7 @@ void ServiceHelper::checkMysqlPassword(YamlStream *userConfig, QWidget *parent)
 
 void ServiceHelper::checkMysqlPassword(Service *service, YamlStream *userConfig, QWidget *parent)
 {
-    if(service->type() != "mysql" || service->state() != ConstUtil::SERVICE_UNKNOWN)
+    if(service->type() != "mysql" || service->state() != ConstUtil::U_SERVICE_UNKNOWN)
         return;
 
     checkMysqlPassword(userConfig,parent);
@@ -95,7 +95,7 @@ void ServiceHelper::checkMysqlPassword(QList<Service *> serviceList, YamlStream 
     bool canChangePassword = false;
     foreach(Service *service,serviceList)
     {
-        if(service->type() == "mysql" && service->state() == ConstUtil::SERVICE_UNKNOWN)
+        if(service->type() == "mysql" && service->state() == ConstUtil::U_SERVICE_UNKNOWN)
         {
             canChangePassword = true;
             break;
@@ -125,7 +125,7 @@ bool ServiceHelper::checkVCEnvironment(Service *service,YamlStream *userConfig)
     if(result == "cancel")
         return false;
 
-    QString exePath = EnvUtil::getPath("zbox/vc_redist." + GParams::instance()->getOsArch() + ".exe");
+    QString exePath = EnvUtil::getPath("bin/vc/vc_redist." + GParams::instance()->getOsArch() + ".exe");
 
     InfoResult exeResult = ProcessUtil::excuteCommand(exePath);
     if(exeResult.error == false)
@@ -156,10 +156,14 @@ bool ServiceHelper::checkVCEnvironment(Service *service,YamlStream *userConfig)
 
 bool ServiceHelper::IsVCInstalled(QString vcRumtime)
 {
+#if VC_CHECK_VER_
     QString batPath = EnvUtil::getPath("zbox/vc_detector_" + GParams::instance()->getOsArch() + ".bat");
     InfoResult infoResult = ProcessUtil::excuteShell(batPath);
 
     QStringList msgList = infoResult.output.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
 
     return infoResult.output.indexOf("INSTALLED") >=0;
+#else
+    return true;
+#endif // VC_CHECK_VER_
 }

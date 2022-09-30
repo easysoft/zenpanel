@@ -13,6 +13,7 @@
 #include "servicehelper.h"
 #include "base/glang.h"
 #include "runners/serviceinstaller.h"
+#include "services/quickonservice.h"
 
 #include <QApplication>
 #include <QMessageBox>
@@ -363,6 +364,11 @@ void Controller::createSerivceList()
                 MysqlService *serivce = new MysqlService(this,config,key);
                 m_serviceList.append(serivce);
             }
+            else if (key == "quickon")
+            {
+                QuickOnService *serivce = new QuickOnService(this,config,key);
+                m_serviceList.append(serivce);
+            }
             else
             {
                 Service *serivce = new Service(this,config,key);
@@ -390,8 +396,6 @@ void Controller::extractParamValues()
         service->extractParamValues();
 
     m_mainProduct->extractParamValues();
-
-
 }
 
 void Controller::updateAppState(bool forcedQuery)
@@ -414,17 +418,17 @@ void Controller::updateAppState(bool forcedQuery)
     foreach(Service *service,serviceList)
     {
         QString iState = service->state();
-        if(iState == ConstUtil::SERVICE_START_PENDING)
+        if(iState == ConstUtil::U_SERVICE_START_PENDING)
             start_pending ++;
-        else if(iState == ConstUtil::SERVICE_RUNNING)
+        else if(iState == ConstUtil::U_SERVICE_RUNNING)
             running ++;
-        else if(iState == ConstUtil::SERVICE_PAUSED)
+        else if(iState == ConstUtil::U_SERVICE_PAUSED)
             paused ++;
-        else if(iState == ConstUtil::SERVICE_STOP_PENDING)
+        else if(iState == ConstUtil::U_SERVICE_STOP_PENDING)
             stop_pending ++;
-        else if(iState == ConstUtil::SERVICE_STOPPED)
+        else if(iState == ConstUtil::U_SERVICE_STOPPED)
             stopped ++;
-        else if(iState == ConstUtil::SERVICE_UNKNOWN)
+        else if(iState == ConstUtil::U_SERVICE_UNKNOWN)
             unknown ++;
     }
 
@@ -448,10 +452,10 @@ bool Controller::isPreInstalled()
     for(int i=0;i<m_serviceList.length();i++)
     {
         Service *service = m_serviceList[i];
-        if(service->type().toLower() == "apache" && service->queryState() == ConstUtil::SERVICE_RUNNING)
+        if(service->type().toLower() == "apache" && service->queryState() == ConstUtil::U_SERVICE_RUNNING)
             apacheInstalled = true;
 
-        if(service->type().toLower() == "mysql" && service->queryState() == ConstUtil::SERVICE_RUNNING)
+        if(service->type().toLower() == "mysql" && service->queryState() == ConstUtil::U_SERVICE_RUNNING)
             mysqlInstalled = true;
     }
 
@@ -598,7 +602,7 @@ bool Controller::autoSelectPort(Service *service)
 
     foreach(Service *service,serviceList)
     {
-        if(service->state() != ConstUtil::SERVICE_UNKNOWN) continue;
+        if(service->state() != ConstUtil::U_SERVICE_UNKNOWN) continue;
         if(service->fixPort() == true) continue;
 
         QString port = service->port();

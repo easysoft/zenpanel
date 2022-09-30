@@ -179,7 +179,7 @@ bool Service::lazyInstallServiceImpl(SendProxy *proxy)
     QString selfNameserviceName =this->serviceName();
     QString selfServiceState = this->queryState();
 
-    if(selfServiceState == ConstUtil::SERVICE_UNKNOWN)
+    if(selfServiceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         return installService(proxy);
     }
@@ -198,11 +198,11 @@ bool Service::lazyInstallServiceImpl(SendProxy *proxy)
         }
         else
         {
-            if(selfServiceState == ConstUtil::SERVICE_RUNNING)
+            if(selfServiceState == ConstUtil::U_SERVICE_RUNNING)
             {
                 return true;
             }
-            else if(selfServiceState == ConstUtil::SERVICE_STOPPED)
+            else if(selfServiceState == ConstUtil::U_SERVICE_STOPPED)
             {
                 return  startService(proxy);
             }
@@ -236,7 +236,7 @@ bool Service::installService(SendProxy *proxy)
 bool Service::installServiceImpl(SendProxy *proxy)
 {
     QString selfServiceState = this->queryState();
-    if(selfServiceState != ConstUtil::SERVICE_UNKNOWN)
+    if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
         return false;
     }
@@ -289,7 +289,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     {
         QString newServiceState = this->queryState();
 
-        if(newServiceState == ConstUtil::SERVICE_STOPPED)
+        if(newServiceState == ConstUtil::U_SERVICE_STOPPED)
         {
             this->setState(newServiceState);
 
@@ -332,7 +332,7 @@ bool Service::uninstallService(SendProxy *proxy)
 bool Service::uninstallServiceImpl(SendProxy *proxy)
 {
     QString serviceState = this->state();
-    if(serviceState != ConstUtil::SERVICE_STOPPED)
+    if(serviceState != ConstUtil::U_SERVICE_STOPPED)
     {
         return false;
     }
@@ -345,10 +345,10 @@ bool Service::uninstallServiceImpl(SendProxy *proxy)
 
     QString newServiceState = this->queryState();
 
-    if(installResult.error == false && newServiceState == ConstUtil::SERVICE_UNKNOWN)
+    if(installResult.error == false && newServiceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         proxy->toSend(getSuccessMsg("message.uninstallSuccess",this->title(),this->port()));
-        this->setState(ConstUtil::SERVICE_UNKNOWN);
+        this->setState(ConstUtil::U_SERVICE_UNKNOWN);
 
         if(this->exeName().isEmpty() == false)
             ProcessUtil::excuteCommand("taskkill /f /im " + this->exeName());
@@ -382,7 +382,7 @@ bool Service::startService(SendProxy *proxy)
 bool Service::startServiceImpl(SendProxy *proxy)
 {
     QString serviceState = this->state();
-    if(serviceState != ConstUtil::SERVICE_STOPPED)
+    if(serviceState != ConstUtil::U_SERVICE_STOPPED)
     {
         return false;
     }
@@ -394,10 +394,10 @@ bool Service::startServiceImpl(SendProxy *proxy)
 
     QString newServiceState = this->queryState();
 
-    if(newServiceState == ConstUtil::SERVICE_RUNNING)
+    if(newServiceState == ConstUtil::U_SERVICE_RUNNING)
     {
         proxy->toSend(getSuccessMsg("message.startSuccess",this->title(),this->port()));
-        this->setState(ConstUtil::SERVICE_RUNNING);
+        this->setState(ConstUtil::U_SERVICE_RUNNING);
 
         return true;
     }
@@ -428,7 +428,7 @@ bool Service::stopService(SendProxy *proxy)
 bool Service::stopServiceImpl(SendProxy *proxy)
 {
     QString serviceState = this->state();
-    if(serviceState != ConstUtil::SERVICE_RUNNING)
+    if(serviceState != ConstUtil::U_SERVICE_RUNNING)
     {
         return false;
     }
@@ -439,9 +439,9 @@ bool Service::stopServiceImpl(SendProxy *proxy)
 
     QString newServiceState = this->queryState();
 
-    if(installResult.error == false && newServiceState == ConstUtil::SERVICE_STOPPED)
+    if(installResult.error == false && newServiceState == ConstUtil::U_SERVICE_STOPPED)
     {
-        this->setState(ConstUtil::SERVICE_STOPPED);
+        this->setState(ConstUtil::U_SERVICE_STOPPED);
         proxy->toSend(getSuccessMsg("message.stopSuccess",this->title(),this->port()));
 
         return true;
@@ -473,7 +473,7 @@ bool Service::killService(SendProxy *proxy)
 bool Service::killServiceImpl(SendProxy *proxy)
 {
     QString serviceState = this->state();
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         return false;
     }
@@ -491,7 +491,7 @@ bool Service::killServiceImpl(SendProxy *proxy)
     {
         result = ProcessUtil::killService(pid);
         QString currentState = this->queryState();
-        if(currentState == ConstUtil::SERVICE_STOPPED)
+        if(currentState == ConstUtil::U_SERVICE_STOPPED)
             result = ProcessUtil::excuteCommand("sc delete " + this->serviceName());
     }
 
@@ -499,9 +499,9 @@ bool Service::killServiceImpl(SendProxy *proxy)
 
     QString newServiceState = this->queryState();
 
-    if(newServiceState == ConstUtil::SERVICE_UNKNOWN)
+    if(newServiceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
-        this->setState(ConstUtil::SERVICE_UNKNOWN);
+        this->setState(ConstUtil::U_SERVICE_UNKNOWN);
         proxy->toSend(getSuccessMsg("message.uninstallSuccess",this->title(),this->port()));
 
         if(this->exeName().isEmpty() == false)
@@ -528,17 +528,17 @@ bool Service::restartServiceImpl(SendProxy *proxy)
 {
     QString serviceState = this->state();
 
-    if(serviceState == ConstUtil::SERVICE_UNKNOWN)
+    if(serviceState == ConstUtil::U_SERVICE_UNKNOWN)
     {
         return installService(proxy);
     }
-    else if(serviceState == ConstUtil::SERVICE_RUNNING)
+    else if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {
         if(!stopService(proxy)) return false;
         sleepBetween();
         return startService(proxy);
     }
-    else if(serviceState == ConstUtil::SERVICE_STOPPED)
+    else if(serviceState == ConstUtil::U_SERVICE_STOPPED)
     {
         return  startService(proxy);
     }
