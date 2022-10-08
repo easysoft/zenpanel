@@ -458,12 +458,12 @@ QString ServiceBase::queryState()
         return  ProcessUtil::serviceState(nowServiceName);
 }
 
-ServiceBase *ServiceBase::getParent() const
+ServiceBase *ServiceBase::GetParent() const
 {
     return m_parent;
 }
 
-void ServiceBase::setParent(ServiceBase *parent)
+void ServiceBase::SetParent(ServiceBase *parent)
 {
     m_parent = parent;
 }

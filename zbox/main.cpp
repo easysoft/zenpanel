@@ -11,13 +11,23 @@
 #include "controller.h"
 #include "zapplication.h"
 
+#include <WinSock2.h>
 #include <windows.h>
+
 #include <versionhelpers.h>
+
+#include <memory>
+#include <string>
 
 static int CheckEnv();
 
 int main(int argc, char *argv[])
 {
+    WSAData data;
+    WSAStartup(0x0202, &data);
+
+    printf("QSslSocket= %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str());
+
     QuickOnService::PrepareCMD();
 
     if (CheckEnv())
@@ -25,6 +35,8 @@ int main(int argc, char *argv[])
         printf("check env failed\n");
         return 0;
     }
+
+    qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
 
     ZApplication a("zentao_zbox_app",argc, argv);
 
@@ -49,7 +61,11 @@ int main(int argc, char *argv[])
 
     QObject::connect(&a, SIGNAL(messageReceived(const QString&)), &controller, SLOT(toActiveWindow(const QString&)));
 
-    return a.exec();
+    a.exec();
+
+    WSACleanup();
+
+    return 0;
 }
 
 static int CheckEnv()

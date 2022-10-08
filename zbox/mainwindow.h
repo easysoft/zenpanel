@@ -24,6 +24,10 @@
 #include "base/zpopupmenu.h"
 
 #include "services/quickonservice.h"
+#include "httprequest/zhttprequest.h"
+
+#include <string>
+#include <memory>
 
 class Controller;
 
@@ -78,6 +82,8 @@ private:
     ZPopupButton *m_themeBlueAction;
     ZPopupButton *m_themeWhiteAction;
     ZPopupButton *m_themeBlackAction;
+
+    ZHttpRequest m_HttpReq;
 
     int m_desireHeight = 570;
     int desireWidth(int realWidth, int realHeight);
@@ -143,6 +149,8 @@ private slots:
     void showMenu();
 
     void resized();
+
+    void OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
 
 };
 #endif // MAINWINDOW_H

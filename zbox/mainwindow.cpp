@@ -34,6 +34,7 @@
 
 MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     : QMainWindow(parent)
+    , m_HttpReq(this)
 {
     m_showLog = true;
 
@@ -113,6 +114,21 @@ void MainWindow::resized()
         hideLog();
 
     adjustAfterLang();
+}
+
+void MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply)
+{
+    printf("############### url = %s, data =[[[%s]]]\n", url->c_str(), data->c_str());
+    m_HttpReq.SetUrl(url->c_str());
+    m_HttpReq.SetPost(data->c_str());
+
+    if (!m_HttpReq.Exec(*reply))
+    {
+        printf("!!!!!!!!!! HTTP Exec FAILED\n");
+        return;
+    }
+
+    printf("@@@@@@@@@@@ HTTP Exec SUCCESS\n");
 }
 
 void MainWindow::hideLog()

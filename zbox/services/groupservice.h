@@ -32,6 +32,9 @@ public:
 
    void extractParamValues();
 
+public:
+   virtual void SetupSignal() override;
+
 private:
     QList<Service*> m_members;
 

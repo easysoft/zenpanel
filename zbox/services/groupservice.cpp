@@ -9,6 +9,7 @@
 #include "configs/yaml2stream.h"
 #include "utils/constutil.h"
 #include "base/sendproxy.h"
+#include "mainwindow.h"
 
 #include <QtMath>
 
@@ -235,6 +236,12 @@ void GroupService::extractParamValues()
     }
 }
 
+void GroupService::SetupSignal()
+{
+    for (auto service : m_members)
+        service->SetupSignal();
+}
+
 void GroupService::createMembers()
 {
     YAML::Node nodeList = m_config->getNode("serviceName");
@@ -251,25 +258,25 @@ void GroupService::createMembers()
         if(key == "apache")
         {
             ApacheService *service = new ApacheService(m_ctr,config,key);
-            service->setParent(this);
+            service->SetParent(this);
             m_members.append(service);
         }
         else if(key == "mysql")
         {
             MysqlService *service = new MysqlService(m_ctr,config,key);
-            service->setParent(this);
+            service->SetParent(this);
             m_members.append(service);
         }
         else if (key == "quickon")
         {
             QuickOnService *service = new QuickOnService(m_ctr,config,key);
-            service->setParent(this);
+            service->SetParent(this);
             m_members.append(service);
         }
         else
         {
             Service *service = new Service(m_ctr,config,key);
-            service->setParent(this);
+            service->SetParent(this);
             m_members.append(service);
         }
     }

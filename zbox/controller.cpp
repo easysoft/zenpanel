@@ -62,8 +62,12 @@ Controller::Controller()
 
     updateAppState();
     extractParamValues();
-
+    
     m_mainWin = new MainWindow(this);
+    
+    // 这里需要用 m_mainWin
+    setupServiceSignal();
+
     m_mainWin->show();
 }
 
@@ -367,6 +371,7 @@ void Controller::createSerivceList()
             else if (key == "quickon")
             {
                 QuickOnService *serivce = new QuickOnService(this,config,key);
+
                 m_serviceList.append(serivce);
             }
             else
@@ -471,6 +476,12 @@ bool Controller::checkApplicationPath()
     }
 
     return true;
+}
+
+void Controller::setupServiceSignal()
+{
+    for (auto service : m_serviceList)
+        service->SetupSignal();
 }
 
 void Controller::computeScale()
@@ -753,6 +764,8 @@ void Controller::onServiceStateChanged(QString typeAndState)
 
 void Controller::toActiveWindow(const QString &)
 {
+    printf("111111111111111111111111111\n\n");
+
     m_mainWin->raise();
     m_mainWin->activateWindow();
     m_mainWin->show();

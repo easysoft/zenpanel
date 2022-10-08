@@ -76,8 +76,8 @@ public:
 
     virtual QString queryState();
 
-    ServiceBase *getParent() const;
-    void setParent(ServiceBase *parent);
+    ServiceBase *GetParent() const;
+    void SetParent(ServiceBase *parent);
 
 protected:
     QString m_type;

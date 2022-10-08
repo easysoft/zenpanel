@@ -3,6 +3,11 @@
 #include "base/gparams.h"
 #include "controller.h"
 #include "utils/constutil.h"
+#include "hardware/hardwareinfo.h"
+#include "mainwindow.h"
+
+#include <QJsonObject>
+#include <QJsonDocument>
 
 #include <Shlobj.h>
 #include <tlhelp32.h>
@@ -10,6 +15,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <random>
 
 static HANDLE g_hChildStd_IN_Rd = NULL;
 static HANDLE g_hChildStd_IN_Wr = NULL;
@@ -26,14 +33,19 @@ static char g_szVBoxManager[MAX_PATH] = { 0 };
 #define VBOXMANAGER_NAME    "VBoxManage.exe"
 #define VBOXSDS_NAME        "VBoxSDS"
 
+#define QUICK_ON_HOST       "https://api.qucheng.com"
+
 static bool CreateChildProcess(void);
+static std::string LocalIP();
 
 QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QString type)
     : Service(controllor, config, type)
     , m_bIsExist(false)
     , m_hScHandle(NULL)
     , m_hScHandleVbox(NULL)
-{
+    , m_HttpPort(0)
+    , m_HttpsPort(0)
+{    
     m_hScHandle = OpenSCManager(NULL, NULL, GENERIC_ALL);
 
     memset(g_szProgmaFiles, 0, sizeof(g_szProgmaFiles));
@@ -67,6 +79,78 @@ QuickOnService::~QuickOnService()
 {
     if (m_hScHandle)
         CloseServiceHandle(m_hScHandle);
+}
+
+bool QuickOnService::QueryUrl(std::string& message)
+{
+    if (QueryUrlLocal(message))
+        return true;
+
+    return QueryUrlNet(message);
+}
+
+bool QuickOnService::SignUrl(quickon_record& record)
+{
+    QJsonObject obj;
+    obj.insert("domain", "");
+    obj.insert("ip", LocalIP().c_str());
+    obj.insert("secretKey", GetHardWareInfo().c_str());
+    obj.insert("sub", "");
+
+    QJsonDocument doc;
+    doc.setObject(obj);
+    QString json = doc.toJson(QJsonDocument::Compact);
+
+    std::shared_ptr<std::string> url_str(new std::string)
+                            , json_str(new std::string(json.toStdString()))
+                            , reply_str(new std::string);
+
+    url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/record");
+
+    printf("************ %s @ %d START EMIT\n", __FUNCTION__, __LINE__);
+    emit HttpPostData(url_str, json_str, reply_str);
+    bool ret = !reply_str->empty();
+    printf("************ %s @ %d END EMIT\n", __FUNCTION__, __LINE__);
+
+    QJsonParseError e;
+    doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
+    if (doc.isNull() || e.error != QJsonParseError::NoError)
+		return false;
+
+    if (!ret || doc["code"].toInt() != 200)
+    {
+        record.message = doc["message"].toString().toStdString();
+        return false;
+    }
+
+    auto data = doc["data"];
+    if (data.isUndefined() || !data.isNull())
+        return false;
+
+    auto data_obj = data.toObject();
+    record.tls_cert_path = data_obj["tls_cert_path"].toString().toStdString();
+    record.tls_key_path = data_obj["tls_key_path"].toString().toStdString();
+    record.domain = data_obj["domain"].toString().toStdString();
+    record.k8s_tls = data_obj["k8s-tls"].toString().toStdString();
+    
+    return ret;
+}
+
+void QuickOnService::QueryPort()
+{
+    std::mt19937::result_type seed = std::random_device()()
+        ^ std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::system_clock::now().time_since_epoch()
+            ).count()
+        ^ std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now().time_since_epoch()
+            ).count()
+        /* ^ more_external_random_stuff */ ;
+    std::mt19937 gen(seed);
+    std::uniform_int_distribution<> dis(8000, 9000);
+    m_HttpPort = dis(gen);
+    m_HttpsPort = dis(gen);
+    printf("------>>>> HTTP = %d, HTTPS = %d\n", m_HttpPort, m_HttpsPort);
 }
 
 void QuickOnService::PrepareCMD()
@@ -103,8 +187,8 @@ void QuickOnService::PrepareCMD()
 
         // exec cmd
         char read_buffer[40960] = { 0 };
-        ExecCmd(read_buffer, "setx /m \"VBOX_USER_HOME\" \"%s\"\r\n", g_szVirtualBoxHome);
-        ExecCmd(read_buffer, "set \"VBOX_USER_HOME\" \"%s\"\r\n", g_szVirtualBoxHome);
+        ExecCmd(read_buffer, 0, 0, "setx /m \"VBOX_USER_HOME\" \"%s\"\r\n", g_szVirtualBoxHome);
+        ExecCmd(read_buffer, 0, 0,"set \"VBOX_USER_HOME\" \"%s\"\r\n", g_szVirtualBoxHome);
 
         return;
     } while (0);
@@ -118,7 +202,7 @@ void QuickOnService::PrepareCMD()
     g_hChildStd_IN_Rd = g_hChildStd_IN_Wr = NULL;
 }
 
-int QuickOnService::ExecCmd(char read_buffer[], const char* fmt, ...)
+int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *proxy, const char* fmt, ...)
 {
     char current_dir[MAX_PATH] = { 0 };
     GetCurrentDirectoryA(MAX_PATH, current_dir);
@@ -130,11 +214,12 @@ int QuickOnService::ExecCmd(char read_buffer[], const char* fmt, ...)
     vsprintf(szCmd, fmt, ap);
     va_end(ap);
 
-    if (!strstr(szCmd, "\r\n"))
-        strcat(szCmd, "\r\n");
-
     DWORD dwRead, dwWritten;
     printf("** START EXEC %s\n", szCmd);
+    if (proxy) proxy->toSend(service->getInfoMsg(szCmd));
+
+    if (!strstr(szCmd, "\r\n"))
+        strcat(szCmd, "\r\n");
     if (!WriteFile(g_hChildStd_IN_Wr, szCmd, strlen(szCmd), &dwWritten, NULL) || !dwWritten)
     {
         printf("write %s failed\n", szCmd);
@@ -165,7 +250,6 @@ int QuickOnService::ExecCmd(char read_buffer[], const char* fmt, ...)
         }
 
         dwTotalRead += dwRead;
-
         read_buffer[dwTotalRead] = 0;
 
         // is done?
@@ -185,9 +269,7 @@ int QuickOnService::ExecCmd(char read_buffer[], const char* fmt, ...)
         }
 
         if (done)
-        {
             break;
-        }
     }
 
     dwTotal += dwTotalRead;
@@ -215,6 +297,15 @@ int QuickOnService::ExecCmd(char read_buffer[], const char* fmt, ...)
     return dwRead;
 }
 
+void QuickOnService::SetupSignal()
+{
+    printf("%s @ %d Start setup signal\n", __FUNCTION__, __LINE__);
+    connect(this, SIGNAL(HttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
+        , m_ctr->MainWin(), SLOT(OnHttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
+        , Qt::BlockingQueuedConnection);
+    printf("!!! %s @ %d Done setup signal\n", __FUNCTION__, __LINE__);
+}
+
 bool QuickOnService::installServiceImpl(SendProxy *proxy)
 {
     char read_buffer[40960] = { 0 };
@@ -228,6 +319,7 @@ bool QuickOnService::installServiceImpl(SendProxy *proxy)
 
     if (IsOvaExist(read_buffer) <= 0 && ImportOVA(read_buffer) <= 0)
     {
+        printf("%s @ %d FAILED", __FUNCTION__, __LINE__);
         return false;
     }
         
@@ -258,13 +350,25 @@ bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::startServiceImpl(SendProxy *proxy)
 {
-    Service::startServiceImpl(proxy);
+    std::string message;
+    if (!QueryUrl(message))
+    {
+        proxy->toSend(getErrorMsg(message.c_str()));
+        return false;
+    }
+    printf("-------------------- %s\n", m_Domain.c_str());
+
+    QueryPort();
+    SaveInit();
 
     char read_buffer[3000] = { 0 };
-    if (ExecCmd(read_buffer, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    {
+        proxy->toSend(getErrorMsg(read_buffer));
         return false;
+    }
 
-    return true;
+    return Service::startServiceImpl(proxy);
 }
 
 bool QuickOnService::stopServiceImpl(SendProxy *proxy)
@@ -272,8 +376,11 @@ bool QuickOnService::stopServiceImpl(SendProxy *proxy)
     Service::stopServiceImpl(proxy);
 
     char read_buffer[3000] = { 0 };
-    if (ExecCmd(read_buffer, "\"%s\" controlvm %s poweroff\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    if (ExecCmd(read_buffer, this, proxy,"\"%s\" controlvm %s poweroff\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    {
+        proxy->toSend(getErrorMsg(read_buffer));
         return false;
+    }
 
     return true;
 }
@@ -288,7 +395,7 @@ bool QuickOnService::restartServiceImpl(SendProxy *proxy)
     Service::restartServiceImpl(proxy);
 
     char read_buffer[3000] = { 0 };
-    if (ExecCmd(read_buffer, "\"%s\" controlvm %s reset\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    if (ExecCmd(read_buffer, this, proxy,"\"%s\" controlvm %s reset\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
         return false;
 
     return true;
@@ -328,12 +435,12 @@ int QuickOnService::IsInstalled()
 
 int QuickOnService::RunVirtualBoxMSI(char* buf)
 {
-    return ExecCmd(buf, "MsiExec.exe /i \"%s\" INSTALLDIR=\"%s\" VBOX_INSTALLDESKTOPSHORTCUT=0 VBOX_INSTALLQUICKLAUNCHSHORTCUT=0 /qn /promptrestart\r\n", g_szVirtualBoxMSI, g_szProgmaFiles);
+    return ExecCmd(buf, this, 0,"MsiExec.exe /i \"%s\" INSTALLDIR=\"%s\" VBOX_INSTALLDESKTOPSHORTCUT=0 VBOX_INSTALLQUICKLAUNCHSHORTCUT=0 /qn /promptrestart\r\n", g_szVirtualBoxMSI, g_szProgmaFiles);
 }
 
 int QuickOnService::IsOvaExist(char* buf)
 {
-    int ret = ExecCmd(buf, "\"%s\" list vms\r\n", g_szVBoxManager);
+    int ret = ExecCmd(buf, 0, 0,"\"%s\" list vms\r\n", g_szVBoxManager);
     if (ret <= 0) 
         return ret;
 
@@ -347,7 +454,7 @@ int QuickOnService::IsOvaExist(char* buf)
 
 int QuickOnService::ImportOVA(char* buf)
 {
-    if (ExecCmd(buf, "\"%s\" import -n \"%s\"", g_szVBoxManager, g_sdzQuickOnOva) <= 0)
+    if (ExecCmd(buf, 0, 0,"\"%s\" import -n \"%s\"", g_szVBoxManager, g_sdzQuickOnOva) <= 0)
         return 0;
         
     auto get_item_id = [buf](char* dst, const char* key)
@@ -381,12 +488,12 @@ int QuickOnService::ImportOVA(char* buf)
     // find cd-rom 
     char ignore_cd_rom[200] = { 0 };
     get_item_id(ignore_cd_rom, "CD-ROM");
-    return ExecCmd(buf, "\"%s\" import \"%s\" %s %s %s %s\r\n", g_szVBoxManager, g_sdzQuickOnOva, suggested_name, ignore_sound_card, ignore_usb, ignore_cd_rom);
+    return ExecCmd(buf, 0, 0,"\"%s\" import \"%s\" %s %s %s %s\r\n", g_szVBoxManager, g_sdzQuickOnOva, suggested_name, ignore_sound_card, ignore_usb, ignore_cd_rom);
 }
 
 int QuickOnService::RemoveOVA(char* buf)
 {
-    if (ExecCmd(buf, "\"%s\" unregistervm --delete %s\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    if (ExecCmd(buf, 0, 0,"\"%s\" unregistervm --delete %s\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
         return false;
 
     return true;
@@ -438,6 +545,109 @@ void QuickOnService::VBoxManageFullPath()
 
     printf(">>>%s<<<\n", g_szVBoxManager);
     CloseHandle(hProcess);
+}
+
+bool QuickOnService::QueryUrlLocal(std::string& message)
+{
+    /*
+        QUICKON_DOMAIN=demo.haogs.cn
+        QUICKON_HTTP_PORT=8080
+        QUICKON_HTTPS_PORT=8443
+    */
+    char local_file_name[MAX_PATH] = { 0 };
+    sprintf(local_file_name, "%s\\host", g_szVirtualBoxHome);
+    FILE* fp = fopen(local_file_name, "rt");
+    if (!fp)
+        return false;
+
+    char line[1000] = { 0 };
+    while (fgets(line, sizeof(line) / sizeof(line[0]), fp)) 
+    {
+        const char* p = strstr(line, "QUICKON_DOMAIN");
+        if (p)
+        {
+            p = strrchr(line, '=');
+            if (!p)
+                break;
+            p++;
+            m_Domain = p;
+            while (*m_Domain.rbegin() == '\r' || *m_Domain.rbegin() == '\n')
+                m_Domain.pop_back();
+            break;
+        }
+    }
+    fclose(fp);
+
+    return !m_Domain.empty();
+}
+
+bool QuickOnService::QueryUrlNet(std::string& message)
+{
+    QJsonObject obj;
+    obj.insert("domain", "");
+    obj.insert("secretKey", GetHardWareInfo().c_str());
+    obj.insert("sub", "");
+
+    QJsonDocument doc;
+    doc.setObject(obj);
+    QString json = doc.toJson(QJsonDocument::Compact);
+
+    std::shared_ptr<std::string> url_str(new std::string)
+                            , json_str(new std::string(json.toStdString()))
+                            , reply_str(new std::string);
+
+    url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/custom");
+
+    printf("************ %s @ %d START EMIT\n", __FUNCTION__, __LINE__);
+    emit HttpPostData(url_str, json_str, reply_str);
+    bool ret = !reply_str->empty();
+    printf("************ %s @ %d END EMIT\n", __FUNCTION__, __LINE__);
+    printf("reply = %s\n\n", reply_str->c_str());
+    QJsonParseError e;
+    doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
+    if (doc.isNull() || e.error != QJsonParseError::NoError)
+		return false;
+
+    if (!ret || doc["code"].toInt() != 200)
+    {
+        message = doc["message"].toString().toStdString();
+        printf("%s @ %d\n", __FUNCTION__, __LINE__);
+        return false;
+    }
+
+    auto data = doc["data"];
+    if (data.isUndefined() || data.isNull())
+    {
+        printf("%s @ %d\n", __FUNCTION__, __LINE__);
+        return false;
+    }
+
+    auto data_obj = data.toObject();
+    if (data_obj["domain"].isString())
+        printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+
+    m_Domain = data_obj["domain"].toString().toStdString();
+    printf("domain = %s\n", m_Domain.c_str());
+    
+    return !m_Domain.empty();
+}
+
+void QuickOnService::SaveInit()
+{
+    char local_file_name[MAX_PATH] = { 0 };
+    sprintf(local_file_name, "%s\\host", g_szVirtualBoxHome);
+    FILE* fp = fopen(local_file_name, "w+t");
+    if (!fp)
+    {
+        printf("ERROR: Can not open file %s\n", local_file_name);
+        return;
+    }
+
+    fprintf(fp, "QUICKON_DOMAIN=%s\n", m_Domain.c_str());
+    fprintf(fp, "QUICKON_HTTP_PORT=%d\n", m_HttpPort);
+    fprintf(fp, "QUICKON_HTTPS_PORT=%d\n", m_HttpsPort);
+    fflush(fp);
+    fclose(fp);
 }
 
 static bool CreateChildProcess()
@@ -494,7 +704,34 @@ static bool CreateChildProcess()
    g_hChildStd_OUT_Wr = g_hChildStd_IN_Rd = NULL;
 
    char buf[1024] = { 0 };
-   QuickOnService::ExecCmd(buf, "chcp 437\r\n");
+   QuickOnService::ExecCmd(buf, 0, 0, "chcp 437\r\n");
 
    return true;
+}
+
+static std::string LocalIP()
+{
+    char strHost[300] = { 0 };
+    // get host name, if fail, SetLastError is called
+    if (gethostname(strHost, sizeof(strHost)) == SOCKET_ERROR)
+        return "";
+	
+    struct hostent* hp;
+    hp = gethostbyname(strHost);
+    if (hp == NULL || hp->h_addr_list[0] == NULL)
+        return "";
+
+    // IPv4: Address is four bytes (32-bit)
+    if ( hp->h_length < 4)
+        return "";
+    // Convert address to . format
+    strHost[0] = 0;
+    // IPv4: Create Address string
+    sprintf(strHost, "%u.%u.%u.%u",
+        (UINT)(((PBYTE) hp->h_addr_list[0])[0]),
+        (UINT)(((PBYTE) hp->h_addr_list[0])[1]),
+        (UINT)(((PBYTE) hp->h_addr_list[0])[2]),
+        (UINT)(((PBYTE) hp->h_addr_list[0])[3]));
+
+    return strHost;
 }

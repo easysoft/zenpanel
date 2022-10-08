@@ -238,6 +238,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     QString selfServiceState = this->queryState();
     if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
+        printf("%s : %s\n", __FUNCTION__, selfServiceState.toStdString().c_str());
         return false;
     }
 
@@ -253,6 +254,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     bool configResult = installConfig(false,proxy);
     if(configResult == false)
     {
+        printf("%s : configResult\n", __FUNCTION__);
         return false;
     }
 
@@ -261,6 +263,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
         if(m_commandList[i].content.isEmpty() == true)
         {
             proxy->toSend(getErrorMsg("message.errorCommandNot", this->title(),this->port()));
+            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
             return false;
         }
     }
@@ -270,7 +273,10 @@ bool Service::installServiceImpl(SendProxy *proxy)
         if(m_commandList[i].type != "before") continue;
 
         if(!excCommand(m_commandList[i],proxy))
+        {
+            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
             return false;
+        }
 
         sleepBetween();
     }
@@ -280,7 +286,10 @@ bool Service::installServiceImpl(SendProxy *proxy)
         if(m_commandList[i].type != "installer") continue;
 
         if(!excCommand(m_commandList[i],proxy))
+        {
+            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
             return false;
+        }
 
         sleepBetween();
     }
@@ -296,7 +305,10 @@ bool Service::installServiceImpl(SendProxy *proxy)
             proxy->toSend(getSuccessMsg("message.installSuccess",this->title(),this->port()));
 
             if(!startService(proxy))
+            {
+                printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
                 return false;
+            }
 
             sleepBetween();
         }
@@ -307,7 +319,10 @@ bool Service::installServiceImpl(SendProxy *proxy)
         if(m_commandList[i].type != "after") continue;
 
         if(!excCommand(m_commandList[i],proxy))
+        {
+            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
             return false;
+        }
 
         sleepBetween();
     }

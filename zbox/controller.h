@@ -75,7 +75,7 @@ public:
     QList<MsgResult> basicsMsgList();
 
     Yaml2Stream *iniConfig() const;
-
+    MainWindow* MainWin() { return m_mainWin; }
 private:
     MainWindow *m_mainWin;
 
@@ -98,6 +98,7 @@ private:
     void extractParamValues();
     
     bool checkApplicationPath();
+    void setupServiceSignal();
 
 private slots:
     void onReceiveMsg(QVariant msg);

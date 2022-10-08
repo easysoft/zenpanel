@@ -64,6 +64,8 @@ SOURCES += \
     utils/envUtil.cpp \
     utils/processutil.cpp \
     utils/yamlutil.cpp \
+    hardware/hardwareinfo.cpp \
+    httprequest/zhttprequest.cpp \
     zapplication.cpp
 
 HEADERS += \
@@ -113,6 +115,8 @@ HEADERS += \
     utils/envutil.h \
     utils/processutil.h \
     utils/yamlutil.h \
+    hardware/hardwareinfo.h \
+    httprequest/zhttprequest.h \
     zapplication.h
 
 
@@ -127,13 +131,15 @@ win32:CONFIG(release, debug|release): LIBS += \
     -lyaml \
     -lAdvapi32 \
     -lShell32 \
-    -lPsapi
+    -lPsapi \
+    -lws2_32
 else:win32:CONFIG(debug, debug|release): LIBS += \
     -L$$OUT_PWD/../yaml/debug/ \
     -lyaml \
     -lAdvapi32 \
     -lShell32 \
-    -lPsapi
+    -lPsapi \
+    -lws2_32
 
 INCLUDEPATH += $$PWD/../yaml
 DEPENDPATH += $$PWD/../yaml

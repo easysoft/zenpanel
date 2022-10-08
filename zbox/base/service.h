@@ -29,6 +29,9 @@ public:
     MsgResult getSuccessMsg(QString msg="",QString placeholder1="",QString placeholder2="",QString directOutput="");
     MsgResult getErrorMsg(QString msg,QString placeholder1="",QString placeholder2="",QString directOutput="");
 
+public:
+    virtual void SetupSignal() {}
+
 protected:
     virtual bool installServiceImpl(SendProxy *proxy);
     virtual bool uninstallServiceImpl(SendProxy *proxy);
