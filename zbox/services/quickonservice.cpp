@@ -359,10 +359,26 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
     printf("-------------------- %s\n", m_Domain.c_str());
 
     QueryPort();
-    SaveInit();
+    SaveInitEnv();
 
     char read_buffer[3000] = { 0 };
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+    {
+        proxy->toSend(getErrorMsg(read_buffer));
+        return false;
+    }
+
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, m_HttpPort) <= 0)
+    {
+        proxy->toSend(getErrorMsg(read_buffer));
+        return false;
+    }
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, m_HttpsPort) <= 0)
+    {
+        proxy->toSend(getErrorMsg(read_buffer));
+        return false;
+    }
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" sharedfolder add %s --name=env --hostpath=\"%s\\init\" --readonly --transient --automount --auto-mount-point=/mnt\r\n", g_szVBoxManager, OVA_QUICKON_NAME, g_szVirtualBoxHome) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
@@ -543,7 +559,6 @@ void QuickOnService::VBoxManageFullPath()
         strcat(g_szVBoxManager, VBOXMANAGER_NAME);
     }
 
-    printf(">>>%s<<<\n", g_szVBoxManager);
     CloseHandle(hProcess);
 }
 
@@ -555,7 +570,7 @@ bool QuickOnService::QueryUrlLocal(std::string& message)
         QUICKON_HTTPS_PORT=8443
     */
     char local_file_name[MAX_PATH] = { 0 };
-    sprintf(local_file_name, "%s\\host", g_szVirtualBoxHome);
+    sprintf(local_file_name, "%s\\init\\env", g_szVirtualBoxHome);
     FILE* fp = fopen(local_file_name, "rt");
     if (!fp)
         return false;
@@ -623,19 +638,17 @@ bool QuickOnService::QueryUrlNet(std::string& message)
     }
 
     auto data_obj = data.toObject();
-    if (data_obj["domain"].isString())
-        printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-
     m_Domain = data_obj["domain"].toString().toStdString();
-    printf("domain = %s\n", m_Domain.c_str());
     
     return !m_Domain.empty();
 }
 
-void QuickOnService::SaveInit()
+void QuickOnService::SaveInitEnv()
 {
     char local_file_name[MAX_PATH] = { 0 };
-    sprintf(local_file_name, "%s\\host", g_szVirtualBoxHome);
+    sprintf(local_file_name, "%s\\init", g_szVirtualBoxHome);
+    CreateDirectoryA(local_file_name, NULL);
+    strcat(local_file_name, "\\env");
     FILE* fp = fopen(local_file_name, "w+t");
     if (!fp)
     {

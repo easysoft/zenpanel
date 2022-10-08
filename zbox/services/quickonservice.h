@@ -40,7 +40,7 @@ public:
     bool SignUrl(quickon_record& record);
 
     void QueryPort();
-    void SaveInit();
+    void SaveInitEnv();
 
     static void PrepareCMD();
     static int ExecCmd(char read_buffer[], Service *service, SendProxy *proxy, const char* fmt, ...);
