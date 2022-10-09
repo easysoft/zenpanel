@@ -36,11 +36,11 @@ public:
     QuickOnService(Controller *controllor, Yaml2Stream *config, QString type);
     virtual ~QuickOnService();
 
-    bool QueryUrl(std::string& message);
+    bool QueryUrl(std::shared_ptr<std::string> domain, std::string& message);
     bool SignUrl(quickon_record& record);
 
-    void QueryPort();
-    void SaveInitEnv();
+    void QueryPortRnd(int& http_port, int& https_port);
+    void SaveInitEnv(std::shared_ptr<std::string> domain, int http_port, int https_port);
 
     static void PrepareCMD();
     static int ExecCmd(char read_buffer[], Service *service, SendProxy *proxy, const char* fmt, ...);
@@ -49,6 +49,7 @@ public:
 
 signals:
     void HttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
+    void NotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port);
     
 public:
     virtual void SetupSignal() override;
@@ -71,16 +72,14 @@ private:
 
     void VBoxManageFullPath();
 
-    bool QueryUrlLocal(std::string& message);
-    bool QueryUrlNet(std::string& message);
+    bool QueryUrlLocal(std::shared_ptr<std::string> domain);
+    bool QueryUrlNet(std::shared_ptr<std::string> domain, std::string& message);
+    void QueryPortLocal(int& http_port, int& https_port);
 
 private:
     bool m_bIsExist;
 
     SC_HANDLE m_hScHandle, m_hScHandleVbox;
-
-    std::string m_Domain;
-    int m_HttpPort, m_HttpsPort;
 }; // VBoxService
 
 #endif // VBOXSERVICE_H

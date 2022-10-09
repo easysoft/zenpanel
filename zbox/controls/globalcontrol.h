@@ -32,7 +32,7 @@ private:
     QPushButton *m_btnIngInstall;
     QPushButton *m_btnUninstall;
     QPushButton *m_btnVisit;
-    QPushButton *m_btnVisitQuickOn;
+//    QPushButton *m_btnVisitQuickOn;
 
     QWidget     *m_QuickOnWidget;
     QVBoxLayout *m_QuickOnLayout;

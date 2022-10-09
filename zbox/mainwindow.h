@@ -84,6 +84,8 @@ private:
     ZPopupButton *m_themeBlackAction;
 
     ZHttpRequest m_HttpReq;
+    std::string m_Domain;
+    int m_HttpPort, m_HttpsPort;
 
     int m_desireHeight = 570;
     int desireWidth(int realWidth, int realHeight);
@@ -151,6 +153,6 @@ private slots:
     void resized();
 
     void OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
-
+    void OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port);
 };
 #endif // MAINWINDOW_H

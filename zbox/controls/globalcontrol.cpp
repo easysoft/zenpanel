@@ -47,7 +47,6 @@ void GlobalControl::stateChanged()
 void GlobalControl::adjustAfterChanged()
 {
     m_btnVisit->setMinimumWidth(0);
-    m_btnVisitQuickOn->setMinimumWidth(0);
     m_btnUninstall->setMinimumWidth(0);
 
     m_btnNotInstall->setMinimumWidth(0);
@@ -57,7 +56,6 @@ void GlobalControl::adjustAfterChanged()
     m_btnIngInstall->setText(tlng("window.installing"));
 
     m_btnVisit->setText(tlng("window.installed.visit"));
-    m_btnVisitQuickOn->setText(tlng("window.installed.visitquickon"));
     m_btnUninstall->setText(tlng("window.installed.stop"));
 
     m_btnVisit->adjustSize();
@@ -128,10 +126,6 @@ void GlobalControl::createInstalledUI()
     m_btnVisit = new QPushButton();
     m_btnVisit->setProperty("forUse","uninstallBtn");
     m_mainLayout->addWidget(m_btnVisit);
-
-    m_btnVisitQuickOn = new QPushButton();
-    m_btnVisitQuickOn->setProperty("forUse","uninstallBtn");
-    m_mainLayout->addWidget(m_btnVisitQuickOn);
 
     m_btnUninstall->setCursor(Qt::PointingHandCursor);
     m_btnVisit->setCursor(Qt::PointingHandCursor);

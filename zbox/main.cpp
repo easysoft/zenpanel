@@ -16,6 +16,8 @@
 
 #include <versionhelpers.h>
 
+#include <QMessageBox>
+
 #include <memory>
 #include <string>
 
@@ -28,14 +30,6 @@ int main(int argc, char *argv[])
 
     printf("QSslSocket= %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str());
 
-    QuickOnService::PrepareCMD();
-
-    if (CheckEnv())
-    {
-        printf("check env failed\n");
-        return 0;
-    }
-
     qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
 
     ZApplication a("zentao_zbox_app",argc, argv);
@@ -43,6 +37,14 @@ int main(int argc, char *argv[])
     if (a.isRunning()) {
         a.sendMessage("raise_window_active");
         return EXIT_SUCCESS;
+    }
+
+    QuickOnService::PrepareCMD();
+
+    if (CheckEnv())
+    {
+        printf("check env failed\n");
+        return 0;
     }
 
     QString rootPath = QCoreApplication::applicationDirPath() + "/";
@@ -72,20 +74,19 @@ static int CheckEnv()
 {
     if (!IsWindows8OrGreater()) // < win10 || server2016
     {
-        printf("invalid windows version 0x%08x", GetVersion());
-        getchar();
+        QMessageBox::information(nullptr, u8"提示", u8"系统版本过低");
         return -1;
     }
-/*
+
+    // VT-D
     char buf[1024] = { 0 };
-    QuickOnService::ExecCmd(buf, "wmic cpu get VirtualizationFirmwareEnabled\r\n");
+    QuickOnService::ExecCmd(buf, nullptr, nullptr, "wmic cpu get VirtualizationFirmwareEnabled\r\n");
     if (!strstr(buf, "TRUE"))
     {
-        printf("VirtualizationFirmwareEnabled FALSE\n");
-        getchar();
+        QMessageBox::information(nullptr, u8"提示", u8"请先开启系统虚拟化");
         return 4;
     }
-*/
+
     SYSTEM_INFO si;
     GetSystemInfo(&si);
 
@@ -103,26 +104,23 @@ static int CheckEnv()
     GetDiskFreeSpaceExA(sys_dir, &bytes_available, &bytes_total, &bytes_free);
 
     uint64_t gb = 1024 * 1024 * 1024;
-    printf("prossor(s) = %d\n", si.dwNumberOfProcessors);
-    printf("total phys mem = %lld - limit %lld, disk free space = %lld\n", mem.ullTotalPhys, 500 * gb, bytes_free.QuadPart);
-
     if (!IsWindowsServer()) // win
     {
         if (si.dwNumberOfProcessors < 4)
         {
-            printf("### dwNumberOfProcessors = %d\n", si.dwNumberOfProcessors);
+            QMessageBox::information(nullptr, u8"提示", u8"需要4核心以上处理器");
             return 1;
         }
 
         if (mem.ullTotalPhys < (uint64_t)(8 * gb))
         {
-            printf("### ullTotalPhys = %d\n", mem.ullTotalPhys);
+            QMessageBox::information(nullptr, u8"提示", u8"需要8GB以上内存");
             return 2;
         }
 
         if (bytes_free.QuadPart < (uint64_t)(50 * gb))
         {
-            printf("### QuadPart = %d\n", bytes_free.QuadPart);
+            QMessageBox::information(nullptr, u8"提示", u8"需要50GB以上硬盘");
             return 3;
         }
 
@@ -131,19 +129,19 @@ static int CheckEnv()
 
     if (si.dwNumberOfProcessors < 8)
     {
-        printf("!!! dwNumberOfProcessors = %d\n", si.dwNumberOfProcessors);
+        QMessageBox::information(nullptr, u8"提示", u8"需要8核心以上处理器");
         return 1;
     }
 
     if (mem.ullTotalPhys < (uint64_t)(32 * gb))
     {
-        printf("!!! ullTotalPhys = %d\n", mem.ullTotalPhys);
+        QMessageBox::information(nullptr, u8"提示", u8"需要32GB以上内存");
         return 2;
     }
 
     if (bytes_free.QuadPart < (uint64_t)(500 * gb))
     {
-        printf("!!! QuadPart = %d\n", bytes_free.QuadPart);
+        QMessageBox::information(nullptr, u8"提示", u8"需要500GB以上硬盘");
         return 3;
     }
 

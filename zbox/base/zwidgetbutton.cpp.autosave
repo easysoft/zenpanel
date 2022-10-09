@@ -1,6 +1,0 @@
-#include "zwidgetbutton.h"
-
-ZWidgetButton::ZWidgetButton(QWidget *parent):QPushButton(parent)
-{
-
-}

@@ -131,6 +131,15 @@ void MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_pt
     printf("@@@@@@@@@@@ HTTP Exec SUCCESS\n");
 }
 
+void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port)
+{
+    m_Domain = *domain;
+    m_HttpPort = http_port;
+    m_HttpsPort = https_port;
+
+    printf("======> %d - %d\n", m_HttpPort, m_HttpsPort);
+}
+
 void MainWindow::hideLog()
 {
     m_btnSwitch->setText(QChar(0xe646));
@@ -714,13 +723,19 @@ void MainWindow::onClickUpdateHelp()
 
 void MainWindow::clickVisit()
 {
+    /*
     QString port = GParams::instance()->getParam("APACHE_PORT");
     QString launch = m_ctr->mainProductLaunch();
 
     QString url = "http://127.0.0.1:" + port + "/" + launch;
     if(port.isEmpty())
         url = "http://127.0.0.1/" + launch;
+    */
+    if (m_Domain.empty() || !m_HttpsPort)
+        return;
 
+    QString url;
+    url.append("https://").append(m_Domain.c_str()).append(":").append(std::to_string(m_HttpsPort).c_str());
     QDesktopServices::openUrl(QUrl(url));
 }
 

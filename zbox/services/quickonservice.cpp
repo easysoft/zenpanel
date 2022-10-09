@@ -43,8 +43,6 @@ QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QStr
     , m_bIsExist(false)
     , m_hScHandle(NULL)
     , m_hScHandleVbox(NULL)
-    , m_HttpPort(0)
-    , m_HttpsPort(0)
 {    
     m_hScHandle = OpenSCManager(NULL, NULL, GENERIC_ALL);
 
@@ -70,9 +68,6 @@ QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QStr
     sprintf(g_szVBoxManager, "%s\\%s", g_szProgmaFiles, VBOXMANAGER_NAME);
 
     VBoxManageFullPath();
-
-    char buf[2000] = { 0 };
-    IsOvaExist(buf);
 }
 
 QuickOnService::~QuickOnService()
@@ -81,12 +76,12 @@ QuickOnService::~QuickOnService()
         CloseServiceHandle(m_hScHandle);
 }
 
-bool QuickOnService::QueryUrl(std::string& message)
+bool QuickOnService::QueryUrl(std::shared_ptr<std::string> domain, std::string& message)
 {
-    if (QueryUrlLocal(message))
+    if (QueryUrlLocal(domain))
         return true;
 
-    return QueryUrlNet(message);
+    return QueryUrlNet(domain, message);
 }
 
 bool QuickOnService::SignUrl(quickon_record& record)
@@ -136,7 +131,7 @@ bool QuickOnService::SignUrl(quickon_record& record)
     return ret;
 }
 
-void QuickOnService::QueryPort()
+void QuickOnService::QueryPortRnd(int& http_port, int& https_port)
 {
     std::mt19937::result_type seed = std::random_device()()
         ^ std::chrono::duration_cast<std::chrono::seconds>(
@@ -148,9 +143,9 @@ void QuickOnService::QueryPort()
         /* ^ more_external_random_stuff */ ;
     std::mt19937 gen(seed);
     std::uniform_int_distribution<> dis(8000, 9000);
-    m_HttpPort = dis(gen);
-    m_HttpsPort = dis(gen);
-    printf("------>>>> HTTP = %d, HTTPS = %d\n", m_HttpPort, m_HttpsPort);
+    http_port = dis(gen);
+    https_port = dis(gen);
+    printf("------>>>> HTTP = %d, HTTPS = %d\n", http_port, https_port);
 }
 
 void QuickOnService::PrepareCMD()
@@ -216,7 +211,7 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
 
     DWORD dwRead, dwWritten;
     printf("** START EXEC %s\n", szCmd);
-    if (proxy) proxy->toSend(service->getInfoMsg(szCmd));
+    if (proxy && service) proxy->toSend(service->getInfoMsg(szCmd));
 
     if (!strstr(szCmd, "\r\n"))
         strcat(szCmd, "\r\n");
@@ -299,21 +294,28 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
 
 void QuickOnService::SetupSignal()
 {
-    printf("%s @ %d Start setup signal\n", __FUNCTION__, __LINE__);
     connect(this, SIGNAL(HttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
         , m_ctr->MainWin(), SLOT(OnHttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
         , Qt::BlockingQueuedConnection);
-    printf("!!! %s @ %d Done setup signal\n", __FUNCTION__, __LINE__);
+    connect(this, SIGNAL(NotifyQuickOnInfo(std::shared_ptr<std::string>, int, int))
+        , m_ctr->MainWin(), SLOT(OnNotifyQuickOnInfo(std::shared_ptr<std::string>, int, int))
+        , Qt::QueuedConnection);
+
+    std::shared_ptr<std::string> domain(new std::string);
+    int http_port = 0, https_port = 0;
+
+    QueryUrlLocal(domain);
+    QueryPortLocal(http_port, https_port);
+
+    printf("======> %d - %d\n", http_port, https_port);
+    emit NotifyQuickOnInfo(domain, http_port, https_port);
 }
 
 bool QuickOnService::installServiceImpl(SendProxy *proxy)
 {
     char read_buffer[40960] = { 0 };
     if (IsInstalled() != 0)
-    {
-        // RunVirtualBoxMSI
         RunVirtualBoxMSI(read_buffer);
-    }
 
     VBoxManageFullPath();
 
@@ -345,46 +347,70 @@ bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
     if (RemoveOVA(buf) <= 0)
         return false;
 
+    char local_file_name[MAX_PATH] = { 0 };
+    sprintf(local_file_name, "%s\\init\\env", g_szVirtualBoxHome);
+    FILE* fp = fopen(local_file_name, "w+");
+    if (fp) fclose(fp);
+
     return true;
 }
 
 bool QuickOnService::startServiceImpl(SendProxy *proxy)
 {
+    std::shared_ptr<std::string> domain(new std::string);
     std::string message;
-    if (!QueryUrl(message))
+    if (!QueryUrl(domain, message))
     {
         proxy->toSend(getErrorMsg(message.c_str()));
         return false;
     }
-    printf("-------------------- %s\n", m_Domain.c_str());
+    printf("-------------------- %s\n", domain->c_str());
 
-    QueryPort();
-    SaveInitEnv();
+    int http_port = 0, https_port = 0;
+    QueryPortLocal(http_port, https_port);
+    if (!http_port || !https_port)
+        QueryPortRnd(http_port, https_port);
+
+    printf("======> %d - %d\n", http_port, https_port);
+    
+    SaveInitEnv(domain, http_port, https_port);
+
+    emit NotifyQuickOnInfo(domain, 0, 0);
 
     char read_buffer[3000] = { 0 };
+    // 启动虚拟机
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
 
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, m_HttpPort) <= 0)
+    // 端口转发
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, http_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, m_HttpsPort) <= 0)
+    
+    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,443\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, https_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
+
+    // 设置共享目录
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" sharedfolder add %s --name=env --hostpath=\"%s\\init\" --readonly --transient --automount --auto-mount-point=/mnt\r\n", g_szVBoxManager, OVA_QUICKON_NAME, g_szVirtualBoxHome) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
 
-    return Service::startServiceImpl(proxy);
+    if (!Service::startServiceImpl(proxy))
+        return false;
+
+    emit NotifyQuickOnInfo(domain, http_port, https_port);
+
+    return true;
 }
 
 bool QuickOnService::stopServiceImpl(SendProxy *proxy)
@@ -490,11 +516,9 @@ int QuickOnService::ImportOVA(char* buf)
     // find Suggested VM name
     char suggested_name[200] = { 0 };
     get_item_id(suggested_name, "Suggested VM name");
-    printf("@@@@@@@@@@@@@ %s\n", suggested_name);
     char* p = strchr(suggested_name, '<');
     if (p) *p = '\0';
     strcat(suggested_name, OVA_QUICKON_NAME);
-    printf(">>>>>>>>>>>> %s\n", suggested_name);
     // find sound card id:
     char ignore_sound_card[200] = { 0 };
     get_item_id(ignore_sound_card, "Sound card");
@@ -562,7 +586,7 @@ void QuickOnService::VBoxManageFullPath()
     CloseHandle(hProcess);
 }
 
-bool QuickOnService::QueryUrlLocal(std::string& message)
+bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
 {
     /*
         QUICKON_DOMAIN=demo.haogs.cn
@@ -585,18 +609,18 @@ bool QuickOnService::QueryUrlLocal(std::string& message)
             if (!p)
                 break;
             p++;
-            m_Domain = p;
-            while (*m_Domain.rbegin() == '\r' || *m_Domain.rbegin() == '\n')
-                m_Domain.pop_back();
+            *domain = p;
+            while (*domain->rbegin() == '\r' || *domain->rbegin() == '\n')
+                domain->pop_back();
             break;
         }
     }
     fclose(fp);
 
-    return !m_Domain.empty();
+    return !domain->empty();
 }
 
-bool QuickOnService::QueryUrlNet(std::string& message)
+bool QuickOnService::QueryUrlNet(std::shared_ptr<std::string> domain, std::string& message)
 {
     QJsonObject obj;
     obj.insert("domain", "");
@@ -638,12 +662,51 @@ bool QuickOnService::QueryUrlNet(std::string& message)
     }
 
     auto data_obj = data.toObject();
-    m_Domain = data_obj["domain"].toString().toStdString();
+    *domain = data_obj["domain"].toString().toStdString();
     
-    return !m_Domain.empty();
+    return !domain->empty();
 }
 
-void QuickOnService::SaveInitEnv()
+void QuickOnService::QueryPortLocal(int& http_port, int& https_port)
+{
+    /*
+        QUICKON_DOMAIN=demo.haogs.cn
+        QUICKON_HTTP_PORT=8080
+        QUICKON_HTTPS_PORT=8443
+    */
+    char local_file_name[MAX_PATH] = { 0 };
+    sprintf(local_file_name, "%s\\init\\env", g_szVirtualBoxHome);
+    FILE* fp = fopen(local_file_name, "rt");
+    if (!fp)
+        return;
+
+    http_port = https_port = 0;
+    char line[1000] = { 0 };
+    while ((!http_port || !https_port) && fgets(line, sizeof(line) / sizeof(line[0]), fp)) 
+    {
+        const char* p;
+        p = strstr(line, "QUICKON_HTTP_PORT");
+        if (p)
+        {
+            p = strrchr(line, '=');
+            if (p) http_port = atoi(p + 1);
+
+            continue;
+        }
+
+        p = strstr(line, "QUICKON_HTTPS_PORT");
+        if (p)
+        {
+            p = strrchr(line, '=');
+            if (p) https_port = atoi(p + 1);
+
+            continue;
+        }
+    }
+    fclose(fp);
+}
+
+void QuickOnService::SaveInitEnv(std::shared_ptr<std::string> domain, int http_port, int https_port)
 {
     char local_file_name[MAX_PATH] = { 0 };
     sprintf(local_file_name, "%s\\init", g_szVirtualBoxHome);
@@ -656,9 +719,9 @@ void QuickOnService::SaveInitEnv()
         return;
     }
 
-    fprintf(fp, "QUICKON_DOMAIN=%s\n", m_Domain.c_str());
-    fprintf(fp, "QUICKON_HTTP_PORT=%d\n", m_HttpPort);
-    fprintf(fp, "QUICKON_HTTPS_PORT=%d\n", m_HttpsPort);
+    fprintf(fp, "QUICKON_DOMAIN=%s\n", domain->c_str());
+    fprintf(fp, "QUICKON_HTTP_PORT=%d\n", http_port);
+    fprintf(fp, "QUICKON_HTTPS_PORT=%d\n", https_port);
     fflush(fp);
     fclose(fp);
 }
