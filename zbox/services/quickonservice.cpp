@@ -386,12 +386,13 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
     }
 
     // 端口转发
+    // 80
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, http_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
-    
+    // 443
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,443\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, https_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
@@ -468,9 +469,6 @@ int QuickOnService::IsInstalled()
 
     CloseHandle(m_hScHandleVbox);
     m_hScHandleVbox = NULL;
-
-    if (st.dwCurrentState != SERVICE_RUNNING)
-        return 3;
 
     return 0;
 }
