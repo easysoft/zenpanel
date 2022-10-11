@@ -17,11 +17,12 @@
 #include <versionhelpers.h>
 
 #include <QMessageBox>
+#include <QCommandLineParser>
 
 #include <memory>
 #include <string>
 
-static int CheckEnv();
+static int CheckEnv(QCommandLineParser& parser);
 
 int main(int argc, char *argv[])
 {
@@ -41,7 +42,22 @@ int main(int argc, char *argv[])
 
     QuickOnService::PrepareCMD();
 
-    if (CheckEnv())
+    QCommandLineParser parser;
+    parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    QCommandLineOption win_proc_num("p", "processor", "winprocessor", "4");
+    parser.addOption(win_proc_num);
+    QCommandLineOption server_proc_num("P", "processor", "serverprocessor", "8");
+    parser.addOption(server_proc_num);
+    QCommandLineOption win_mem_gb("m", "memory", "winmemory", "8");
+    parser.addOption(win_mem_gb);
+    QCommandLineOption server_mem_gb("M", "memory", "servermemory", "32");
+    parser.addOption(server_mem_gb);
+    QCommandLineOption win_disk_gb("d", "disk", "windisk", "50");
+    parser.addOption(win_disk_gb);
+    QCommandLineOption server_disk_gb("D", "disk", "serverdisk", "500");
+    parser.addOption(server_disk_gb);
+    parser.process(a);
+    if (CheckEnv(parser))
     {
         printf("check env failed\n");
         return 0;
@@ -70,7 +86,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-static int CheckEnv()
+static int CheckEnv(QCommandLineParser& parser)
 {
     if (!IsWindows8OrGreater()) // < win10 || server2016
     {
@@ -104,44 +120,62 @@ static int CheckEnv()
     GetDiskFreeSpaceExA(sys_dir, &bytes_available, &bytes_total, &bytes_free);
 
     uint64_t gb = 1024 * 1024 * 1024;
+
+    uint64_t processor, mem_limit, disk_limit;
+    QString tip;
     if (!IsWindowsServer()) // win
     {
-        if (si.dwNumberOfProcessors < 4)
+        processor = parser.value("p").toULongLong();
+        printf(">>>> processor = %lld -- %lld\n", processor, parser.value("P").toULongLong());
+        if (si.dwNumberOfProcessors < processor)
         {
-            QMessageBox::information(nullptr, u8"提示", u8"需要4核心以上处理器");
+            tip = u8"需要" + QString(std::to_string(processor).c_str()) + u8"核心以上处理器";
+            QMessageBox::information(nullptr, u8"提示", tip);
             return 1;
         }
 
+        mem_limit = parser.value("m").toULongLong();
+        printf(">>>> memory = %lld -- %lld\n", mem_limit, parser.value("M").toULongLong());
         if (mem.ullTotalPhys < (uint64_t)(8 * gb))
         {
-            QMessageBox::information(nullptr, u8"提示", u8"需要8GB以上内存");
+            tip = u8"需要" + QString(std::to_string(mem_limit).c_str()) + u8"GB以上内存";
+            QMessageBox::information(nullptr, u8"提示", tip);
             return 2;
         }
 
+        disk_limit = parser.value("d").toULongLong();
+        printf(">>>> disk = %lld -- %lld\n", disk_limit, parser.value("D").toULongLong());
         if (bytes_free.QuadPart < (uint64_t)(50 * gb))
         {
-            QMessageBox::information(nullptr, u8"提示", u8"需要50GB以上硬盘");
+            tip = u8"需要" + QString(std::to_string(disk_limit).c_str()) + u8"GB以上硬盘";
+            QMessageBox::information(nullptr, u8"提示", tip);
             return 3;
         }
 
         return 0;
     }
 
+    processor = parser.value("P").toULongLong();
     if (si.dwNumberOfProcessors < 8)
     {
-        QMessageBox::information(nullptr, u8"提示", u8"需要8核心以上处理器");
+        tip = u8"需要" + QString(std::to_string(processor).c_str()) + u8"核心以上处理器";
+        QMessageBox::information(nullptr, u8"提示", tip);
         return 1;
     }
 
+    mem_limit = parser.value("M").toULongLong();
     if (mem.ullTotalPhys < (uint64_t)(32 * gb))
     {
-        QMessageBox::information(nullptr, u8"提示", u8"需要32GB以上内存");
+        tip = u8"需要" + QString(std::to_string(mem_limit).c_str()) + u8"GB以上内存";
+        QMessageBox::information(nullptr, u8"提示", tip);
         return 2;
     }
 
+    disk_limit = parser.value("D").toULongLong();
     if (bytes_free.QuadPart < (uint64_t)(500 * gb))
     {
-        QMessageBox::information(nullptr, u8"提示", u8"需要500GB以上硬盘");
+        tip = u8"需要" + QString(std::to_string(disk_limit).c_str()) + u8"GB以上硬盘";
+        QMessageBox::information(nullptr, u8"提示", tip);
         return 3;
     }
 
