@@ -136,7 +136,7 @@ static int CheckEnv(QCommandLineParser& parser)
 
         mem_limit = parser.value("m").toULongLong();
         printf(">>>> memory = %lld -- %lld\n", mem_limit, parser.value("M").toULongLong());
-        if (mem.ullTotalPhys < (uint64_t)(8 * gb))
+        if (mem.ullTotalPhys < (uint64_t)(mem_limit * gb))
         {
             tip = u8"需要" + QString(std::to_string(mem_limit).c_str()) + u8"GB以上内存";
             QMessageBox::information(nullptr, u8"提示", tip);
@@ -145,7 +145,7 @@ static int CheckEnv(QCommandLineParser& parser)
 
         disk_limit = parser.value("d").toULongLong();
         printf(">>>> disk = %lld -- %lld\n", disk_limit, parser.value("D").toULongLong());
-        if (bytes_free.QuadPart < (uint64_t)(50 * gb))
+        if (bytes_free.QuadPart < (uint64_t)(disk_limit * gb))
         {
             tip = u8"需要" + QString(std::to_string(disk_limit).c_str()) + u8"GB以上硬盘";
             QMessageBox::information(nullptr, u8"提示", tip);
@@ -156,7 +156,7 @@ static int CheckEnv(QCommandLineParser& parser)
     }
 
     processor = parser.value("P").toULongLong();
-    if (si.dwNumberOfProcessors < 8)
+    if (si.dwNumberOfProcessors < processor)
     {
         tip = u8"需要" + QString(std::to_string(processor).c_str()) + u8"核心以上处理器";
         QMessageBox::information(nullptr, u8"提示", tip);
@@ -164,7 +164,7 @@ static int CheckEnv(QCommandLineParser& parser)
     }
 
     mem_limit = parser.value("M").toULongLong();
-    if (mem.ullTotalPhys < (uint64_t)(32 * gb))
+    if (mem.ullTotalPhys < (uint64_t)(mem_limit * gb))
     {
         tip = u8"需要" + QString(std::to_string(mem_limit).c_str()) + u8"GB以上内存";
         QMessageBox::information(nullptr, u8"提示", tip);
@@ -172,7 +172,7 @@ static int CheckEnv(QCommandLineParser& parser)
     }
 
     disk_limit = parser.value("D").toULongLong();
-    if (bytes_free.QuadPart < (uint64_t)(500 * gb))
+    if (bytes_free.QuadPart < (uint64_t)(disk_limit * gb))
     {
         tip = u8"需要" + QString(std::to_string(disk_limit).c_str()) + u8"GB以上硬盘";
         QMessageBox::information(nullptr, u8"提示", tip);
