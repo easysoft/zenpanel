@@ -13,7 +13,7 @@ InfoResult ProcessUtil::excuteCommand(QString command,QStringList params)
     bool ret;
     QProcess process;
 
-    printf("&&&&&&&&&& %s\n", command.toStdString().c_str());
+    printf("e&&&&&&&&&& %s\n", command.toStdString().c_str());
     if(params.length() >0)
         process.start(command,params);
     else

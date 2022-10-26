@@ -132,14 +132,16 @@ win32:CONFIG(release, debug|release): LIBS += \
     -lAdvapi32 \
     -lShell32 \
     -lPsapi \
-    -lws2_32
+    -lws2_32 \
+    -lIphlpapi
 else:win32:CONFIG(debug, debug|release): LIBS += \
     -L$$OUT_PWD/../yaml/debug/ \
     -lyaml \
     -lAdvapi32 \
     -lShell32 \
     -lPsapi \
-    -lws2_32
+    -lws2_32 \
+    -lIphlpapi
 
 INCLUDEPATH += $$PWD/../yaml
 DEPENDPATH += $$PWD/../yaml

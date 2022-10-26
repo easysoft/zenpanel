@@ -12,11 +12,15 @@
 #include <Shlobj.h>
 #include <tlhelp32.h>
 #include <psapi.h>
+#include <Iphlpapi.h>
+
+#include <random>
+#include <vector>
+#include <string>
+#include <algorithm>
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <random>
 
 static HANDLE g_hChildStd_IN_Rd = NULL;
 static HANDLE g_hChildStd_IN_Wr = NULL;
@@ -37,6 +41,9 @@ static char g_szVBoxManager[MAX_PATH] = { 0 };
 
 static bool CreateChildProcess(void);
 static std::string LocalIP();
+static bool EnumRegPhysicalNetworkCard(std::vector<std::string>& physical_cards);
+static bool EnumNetworkCardDesc(HKEY hKey, const char* sub_key, std::string& desc);
+static bool EnumAdaptersInfo(std::string& local_ip, const std::vector<std::string>& physical_cards);
 
 QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QString type)
     : Service(controllor, config, type)
@@ -81,16 +88,24 @@ bool QuickOnService::QueryUrl(std::shared_ptr<std::string> domain, std::string& 
     if (QueryUrlLocal(domain))
         return true;
 
-    return QueryUrlNet(domain, message);
+    if (!QueryUrlNet(domain, message))
+        return false;
+
+    quickon_record record;
+    return SignUrl(domain, message, record);
 }
 
-bool QuickOnService::SignUrl(quickon_record& record)
+bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record)
 {
     QJsonObject obj;
-    obj.insert("domain", "");
+
+    char sub[200] = { 0 };
+    sscanf(domain->c_str(), "%[a-zA-Z0-9]", sub);
+    const char* real_domain = domain->c_str() + strlen(sub) + 1;
+    obj.insert("domain", real_domain);
     obj.insert("ip", LocalIP().c_str());
     obj.insert("secretKey", GetHardWareInfo().c_str());
-    obj.insert("sub", "");
+    obj.insert("sub", sub);
 
     QJsonDocument doc;
     doc.setObject(obj);
@@ -785,27 +800,138 @@ static bool CreateChildProcess()
 
 static std::string LocalIP()
 {
-    char strHost[300] = { 0 };
-    // get host name, if fail, SetLastError is called
-    if (gethostname(strHost, sizeof(strHost)) == SOCKET_ERROR)
-        return "";
-	
-    struct hostent* hp;
-    hp = gethostbyname(strHost);
-    if (hp == NULL || hp->h_addr_list[0] == NULL)
+    std::vector<std::string> physical_cards;
+    if (!EnumRegPhysicalNetworkCard(physical_cards))
         return "";
 
-    // IPv4: Address is four bytes (32-bit)
-    if ( hp->h_length < 4)
-        return "";
-    // Convert address to . format
-    strHost[0] = 0;
-    // IPv4: Create Address string
-    sprintf(strHost, "%u.%u.%u.%u",
-        (UINT)(((PBYTE) hp->h_addr_list[0])[0]),
-        (UINT)(((PBYTE) hp->h_addr_list[0])[1]),
-        (UINT)(((PBYTE) hp->h_addr_list[0])[2]),
-        (UINT)(((PBYTE) hp->h_addr_list[0])[3]));
+    std::string local_ip;
+    if (EnumAdaptersInfo(local_ip, physical_cards))
+        return local_ip;
 
-    return strHost;
+    return "";
+}
+
+
+static bool EnumRegPhysicalNetworkCard(std::vector<std::string>& physical_cards)
+{
+    HKEY hKey = 0;
+    if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\Class\\{4d36e972-e325-11ce-bfc1-08002be10318}", 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &hKey) != ERROR_SUCCESS)
+        return false;
+
+    char str[1000] = { 0 };
+    DWORD len = sizeof(str);
+    DWORD index = 0;
+
+    std::string desc;
+
+    for (;;) {
+        LSTATUS st = RegEnumKeyExA(hKey, index, str, &len, 0, 0, 0, 0);
+        if (st != ERROR_SUCCESS && st != ERROR_MORE_DATA)
+            break;
+
+        str[len] = 0;
+
+        desc.clear();
+        if (EnumNetworkCardDesc(hKey, str, desc))
+            physical_cards.push_back(desc);
+
+        len = sizeof(str);
+        index++;
+    }
+
+    RegCloseKey(hKey);
+
+    return !physical_cards.empty();
+}
+
+static bool EnumNetworkCardDesc(HKEY hKey, const char* sub_key, std::string& desc)
+{
+    HKEY hSubKey;
+    if (RegOpenKeyExA(hKey, sub_key, 0, KEY_QUERY_VALUE | KEY_ENUMERATE_SUB_KEYS, &hSubKey) != ERROR_SUCCESS)
+        return false;
+
+    do
+    {
+        DWORD Characteristics;
+        DWORD size = sizeof(Characteristics);
+        DWORD type = REG_DWORD;
+        if (RegQueryValueExA(hSubKey, "Characteristics", 0, &type, (LPBYTE)&Characteristics, &size) != ERROR_SUCCESS)
+            break;
+
+        if (Characteristics != 0x84)
+            break;
+
+        char DriverDesc[1000] = { 0 };
+        size = sizeof(DriverDesc);
+        type = REG_SZ;
+        if (RegQueryValueExA(hSubKey, "DriverDesc", 0, &type, (LPBYTE)DriverDesc, &size) != ERROR_SUCCESS)
+            break;
+
+        desc = DriverDesc;
+    } while (0);
+
+    RegCloseKey(hSubKey);
+
+    return !desc.empty();
+}
+
+static bool EnumAdaptersInfo(std::string& local_ip, const std::vector<std::string>& physical_cards)
+{
+    //PIP_ADAPTER_INFO结构体指针存储本机网卡信息
+    PIP_ADAPTER_INFO pIpAdapterInfo = new IP_ADAPTER_INFO();
+    //得到结构体大小,用于GetAdaptersInfo参数
+    unsigned long stSize = sizeof(IP_ADAPTER_INFO);
+    //调用GetAdaptersInfo函数,填充pIpAdapterInfo指针变量;其中stSize参数既是一个输入量也是一个输出量
+    int nRel = GetAdaptersInfo(pIpAdapterInfo, &stSize);
+    if (ERROR_BUFFER_OVERFLOW == nRel)
+    {
+        //如果函数返回的是ERROR_BUFFER_OVERFLOW
+        //则说明GetAdaptersInfo参数传递的内存空间不够,同时其传出stSize,表示需要的空间大小
+        //这也是说明为什么stSize既是一个输入量也是一个输出量
+        //释放原来的内存空间
+        delete pIpAdapterInfo;
+        //重新申请内存空间用来存储所有网卡信息
+        pIpAdapterInfo = (PIP_ADAPTER_INFO)new BYTE[stSize];
+        //再次调用GetAdaptersInfo函数,填充pIpAdapterInfo指针变量
+        nRel = GetAdaptersInfo(pIpAdapterInfo, &stSize);
+    }
+
+    if (ERROR_SUCCESS != nRel)
+        return false;
+
+    do
+    {
+        //输出网卡信息
+        //可能有多网卡,因此通过循环去判断
+        for (PIP_ADAPTER_INFO p = pIpAdapterInfo; p; p = p->Next)
+        {
+            if (std::find(physical_cards.begin(), physical_cards.end(), p->Description) == physical_cards.end())
+                continue;
+
+            printf("name: %s\n", p->AdapterName);
+            printf("desc: %s\n", p->Description);
+            //可能网卡有多IP,因此通过循环去判断
+            IP_ADDR_STRING* pIpAddrString = &(p->IpAddressList);
+            do
+            {
+                printf("### addr: %s\n", pIpAddrString->IpAddress.String);
+
+                if (strlen(pIpAddrString->IpAddress.String) && strcmp(pIpAddrString->IpAddress.String, "0.0.0.0"))
+                {
+                    local_ip = pIpAddrString->IpAddress.String;
+                    break;
+                }
+
+                pIpAddrString = pIpAddrString->Next;
+            } while (pIpAddrString);
+        }
+    } while (0);
+
+    //释放内存空间
+    if (pIpAdapterInfo)
+    {
+        delete pIpAdapterInfo;
+    }
+
+    return !local_ip.empty();
 }

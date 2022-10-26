@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     WSAData data;
     WSAStartup(0x0202, &data);
 
-    printf("QSslSocket= %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str());
+    printf("QSslSocket= %s, supportsSsl = %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str(), QSslSocket::supportsSsl() ? "true" : "false");
 
     qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
 

@@ -37,7 +37,7 @@ public:
     virtual ~QuickOnService();
 
     bool QueryUrl(std::shared_ptr<std::string> domain, std::string& message);
-    bool SignUrl(quickon_record& record);
+    bool SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record);
 
     void QueryPortRnd(int& http_port, int& https_port);
     void SaveInitEnv(std::shared_ptr<std::string> domain, int http_port, int https_port);
