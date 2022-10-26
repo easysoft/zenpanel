@@ -119,9 +119,13 @@ bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& m
 
     printf("************ %s @ %d START EMIT\n", __FUNCTION__, __LINE__);
     emit HttpPostData(url_str, json_str, reply_str);
-    bool ret = !reply_str->empty();
     printf("************ %s @ %d END EMIT\n", __FUNCTION__, __LINE__);
+    printf("reply: = %s\n", reply_str->c_str());
 
+    // todo: ret
+    return true;
+
+    bool ret = !reply_str->empty();
     QJsonParseError e;
     doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
     if (doc.isNull() || e.error != QJsonParseError::NoError)
@@ -372,14 +376,16 @@ bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::startServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
     std::shared_ptr<std::string> domain(new std::string);
     std::string message;
     if (!QueryUrl(domain, message))
     {
+        printf("QueryUrl Failed: %s @ %d\n", __FUNCTION__, __LINE__);
         proxy->toSend(getErrorMsg(message.c_str()));
         return false;
     }
-    printf("-------------------- %s\n", domain->c_str());
+    printf("-------------------- %s @ %d: %s\n", __FUNCTION__, __LINE__, domain->c_str());
 
     int http_port = 0, https_port = 0;
     QueryPortLocal(http_port, https_port);
@@ -394,6 +400,7 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
 
     char read_buffer[3000] = { 0 };
     // 启动虚拟机
+    printf("$$$$$$$$$$ %s @ %d: startvm\n", __FUNCTION__, __LINE__);
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
@@ -402,12 +409,14 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
 
     // 端口转发
     // 80
+    printf("$$$$$$$$$$ %s @ %d: natpf1 80\n", __FUNCTION__, __LINE__);
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, http_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
     // 443
+    printf("$$$$$$$$$$ %s @ %d: natpf1 443\n", __FUNCTION__, __LINE__);
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,443\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, https_port) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
@@ -415,22 +424,28 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
     }
 
     // 设置共享目录
+    printf("$$$$$$$$$$ %s @ %d: sharedfolder\n", __FUNCTION__, __LINE__);
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" sharedfolder add %s --name=env --hostpath=\"%s\\init\" --readonly --transient --automount --auto-mount-point=/mnt\r\n", g_szVBoxManager, OVA_QUICKON_NAME, g_szVirtualBoxHome) <= 0)
     {
         proxy->toSend(getErrorMsg(read_buffer));
         return false;
     }
 
+    printf("$$$$$$$$$$ %s @ %d: startServiceImpl\n", __FUNCTION__, __LINE__);
     if (!Service::startServiceImpl(proxy))
         return false;
 
     emit NotifyQuickOnInfo(domain, http_port, https_port);
+
+    printf("$$$$$$$$$$ %s @ %d: DONE\n", __FUNCTION__, __LINE__);
 
     return true;
 }
 
 bool QuickOnService::stopServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+
     Service::stopServiceImpl(proxy);
 
     char read_buffer[3000] = { 0 };
@@ -445,11 +460,15 @@ bool QuickOnService::stopServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::killServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+
     return Service::killServiceImpl(proxy);
 }
 
 bool QuickOnService::restartServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+
     Service::restartServiceImpl(proxy);
 
     char read_buffer[3000] = { 0 };
@@ -461,6 +480,8 @@ bool QuickOnService::restartServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::lazyInstallServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+
     return installServiceImpl(proxy);
 }
 
@@ -610,7 +631,10 @@ bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
     sprintf(local_file_name, "%s\\init\\env", g_szVirtualBoxHome);
     FILE* fp = fopen(local_file_name, "rt");
     if (!fp)
+    {
+        printf("%s not exist\n", local_file_name);
         return false;
+    }
 
     char line[1000] = { 0 };
     while (fgets(line, sizeof(line) / sizeof(line[0]), fp)) 
