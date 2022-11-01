@@ -11,6 +11,8 @@
 #include "controller.h"
 #include "zapplication.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <WinSock2.h>
 #include <windows.h>
 
@@ -22,6 +24,13 @@
 #include <memory>
 #include <string>
 
+#ifdef Q_OS_WIN
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif // Q_OS_WIN
+
 static int CheckEnv(QCommandLineParser& parser);
 
 int main(int argc, char *argv[])
@@ -32,6 +41,15 @@ int main(int argc, char *argv[])
     printf("QSslSocket= %s, supportsSsl = %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str(), QSslSocket::supportsSsl() ? "true" : "false");
 
     qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
+#ifdef USE_SPDLOG_
+#ifdef Q_OS_WIN
+    mkdir("logs");
+#else
+    mkdir("logs", S_IRWXU);
+#endif // Q_OS_WIN
+    spdlog::spdlog_init("zenshot", "logs/log.log", 23, 57, 0, 0);
+    L_TRACE("start");
+#endif // USE_SPDLOG_
 
     ZApplication a("zentao_zbox_app",argc, argv);
 
