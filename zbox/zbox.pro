@@ -252,5 +252,6 @@ DEPENDPATH += $$PWD/../yaml
 include(./qtsingleapplication/qtsingleapplication.pri)
 
 RESOURCES +=
+
 DISTFILES += \
     spdlog/fmt/bundled/fmt.license.rst

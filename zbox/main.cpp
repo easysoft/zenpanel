@@ -30,7 +30,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif // Q_OS_WIN
-
 static int CheckEnv(QCommandLineParser& parser);
 
 int main(int argc, char *argv[])
@@ -41,6 +40,7 @@ int main(int argc, char *argv[])
     printf("QSslSocket= %s, supportsSsl = %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str(), QSslSocket::supportsSsl() ? "true" : "false");
 
     qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
+
 #ifdef USE_SPDLOG_
 #ifdef Q_OS_WIN
     mkdir("logs");
