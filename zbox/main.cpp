@@ -10,8 +10,27 @@
 #include "controller.h"
 #include "zapplication.h"
 
+#include "spdlogwrapper.hpp"
+
+#ifdef Q_OS_WIN
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif // Q_OS_WIN
+
 int main(int argc, char *argv[])
 {
+#ifdef USE_SPDLOG_
+#ifdef Q_OS_WIN
+    mkdir("logs");
+#else
+    mkdir("logs", S_IRWXU);
+#endif // Q_OS_WIN
+    spdlog::spdlog_init("zenshot", "logs/log.log", 23, 57, 0, 0);
+    L_TRACE("start");
+#endif // USE_SPDLOG_
+
     ZApplication a("zentao_zbox_app",argc, argv);
 
     if (a.isRunning()) {
