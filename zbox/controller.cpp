@@ -60,9 +60,12 @@ Controller::Controller()
         }
     }
 
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
     updateAppState();
+    printf("%s @ %d extractParamValues", __FUNCTION__, __LINE__);
     extractParamValues();
     
+    printf("%s @ %d MainWindow", __FUNCTION__, __LINE__);
     m_mainWin = new MainWindow(this);
     
     // 这里需要用 m_mainWin
@@ -371,7 +374,6 @@ void Controller::createSerivceList()
             else if (key == "quickon")
             {
                 QuickOnService *serivce = new QuickOnService(this,config,key);
-
                 m_serviceList.append(serivce);
             }
             else
@@ -405,6 +407,7 @@ void Controller::extractParamValues()
 
 void Controller::updateAppState(bool forcedQuery)
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
     if(forcedQuery == true)
     {
         foreach(Service *service,m_serviceList)
@@ -451,6 +454,7 @@ void Controller::onAppStateChanged()
 
 bool Controller::isPreInstalled()
 {
+    return true;
     bool apacheInstalled = false;
     bool mysqlInstalled = false;
 

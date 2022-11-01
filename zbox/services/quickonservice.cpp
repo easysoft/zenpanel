@@ -332,6 +332,8 @@ void QuickOnService::SetupSignal()
 
 bool QuickOnService::installServiceImpl(SendProxy *proxy)
 {
+    printf("%s @ %d", __FUNCTION__, __LINE__);
+
     char read_buffer[40960] = { 0 };
     if (IsInstalled() != 0)
         RunVirtualBoxMSI(read_buffer);
@@ -349,6 +351,7 @@ bool QuickOnService::installServiceImpl(SendProxy *proxy)
 
 QString QuickOnService::queryState()
 {
+    printf("%s @ %d\n", __FUNCTION__, __LINE__);
     if (IsInstalled() != 0)
         return ConstUtil::U_SERVICE_UNKNOWN;
 
@@ -520,8 +523,8 @@ int QuickOnService::IsOvaExist(char* buf)
     if (ret <= 0) 
         return ret;
 
-    printf("list vms done => %s\n", buf);
     char* p = strstr(buf, OVA_QUICKON_NAME);
+    printf("@#### %s\n", p ? "HAS OVA" : "NO OVA");
     if (!p)
         return 0;
     

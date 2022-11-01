@@ -75,6 +75,7 @@ QString GroupService::queryState()
 
 bool GroupService::installConfig(bool ignoreBug, SendProxy *proxy)
 {
+    return true;
     bool result = true;
 
     foreach(Service *service,m_members)
@@ -257,12 +258,16 @@ void GroupService::createMembers()
 
         if(key == "apache")
         {
+            printf("%s @ %d: new apache\n", __FUNCTION__, __LINE__);
+            system("pause");
             ApacheService *service = new ApacheService(m_ctr,config,key);
             service->SetParent(this);
             m_members.append(service);
         }
         else if(key == "mysql")
         {
+            printf("%s @ %d: new mysql\n", __FUNCTION__, __LINE__);
+            system("pause");
             MysqlService *service = new MysqlService(m_ctr,config,key);
             service->SetParent(this);
             m_members.append(service);

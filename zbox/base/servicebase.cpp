@@ -452,6 +452,7 @@ void ServiceBase::extractParamValues()
 QString ServiceBase::queryState()
 {
     QString nowServiceName = serviceName();
+    printf("%s @ %d: %s\n", __FUNCTION__, __LINE__, nowServiceName.toStdString().c_str());
     if(nowServiceName == "false")
         return  ConstUtil::U_SERVICE_RUNNING;
     else

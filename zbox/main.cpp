@@ -82,6 +82,7 @@ int main(int argc, char *argv[])
     a.exec();
 
     WSACleanup();
+    system("pause");
 
     return 0;
 }
