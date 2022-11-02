@@ -31,6 +31,7 @@
 #include "base/gbus.h"
 #include "runners/envrunner.h"
 #include "controls/closedialog.h"
+#include "spdlogwrapper.hpp"
 
 MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     : QMainWindow(parent)
@@ -118,17 +119,17 @@ void MainWindow::resized()
 
 void MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply)
 {
-    printf("############### url = %s, data =[[[%s]]]\n", url->c_str(), data->c_str());
+    L_TRACE("############### url = {0}, data =[[[{1}]]]", url->c_str(), data->c_str());
     m_HttpReq.SetUrl(url->c_str());
     m_HttpReq.SetPost(data->c_str());
 
     if (!m_HttpReq.Exec(*reply))
     {
-        printf("!!!!!!!!!! HTTP Exec FAILED\n");
+        L_ERROR("!!!!!!!!!! HTTP Exec FAILED");
         return;
     }
 
-    printf("@@@@@@@@@@@ HTTP Exec SUCCESS\n");
+    L_TRACE("@@@@@@@@@@@ HTTP Exec SUCCESS");
 }
 
 void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port)
@@ -137,7 +138,7 @@ void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, 
     m_HttpPort = http_port;
     m_HttpsPort = https_port;
 
-    printf("======> %d - %d\n", m_HttpPort, m_HttpsPort);
+    L_TRACE("======> HttpPort: {0} -- HttpsPort: {1}", m_HttpPort, m_HttpsPort);
 }
 
 void MainWindow::hideLog()

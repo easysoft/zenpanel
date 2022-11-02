@@ -6,6 +6,8 @@
 #include "hardware/hardwareinfo.h"
 #include "mainwindow.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QJsonObject>
 #include <QJsonDocument>
 
@@ -56,7 +58,7 @@ QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QStr
     memset(g_szProgmaFiles, 0, sizeof(g_szProgmaFiles));
     SHGetFolderPathA(0, CSIDL_PROGRAM_FILES, 0, 0, g_szProgmaFiles);
 
-    printf("%s\n", g_szProgmaFiles);
+    L_TRACE("g_szProgmaFiles: {0}", g_szProgmaFiles);
     sprintf(g_szProgmaFiles + strlen(g_szProgmaFiles), "\\%s", OVA_QUICKON_NAME);
     CreateDirectoryA(g_szProgmaFiles, NULL);
     strcat(g_szProgmaFiles, "\\data");
@@ -69,7 +71,7 @@ QuickOnService::QuickOnService(Controller *controllor, Yaml2Stream *config, QStr
     CreateDirectoryA(g_szVirtualBoxHome, NULL);
     strcat(g_szVirtualBoxHome, "\\.VirtualBox");
     CreateDirectoryA(g_szVirtualBoxHome, NULL);
-    printf("%s\n", g_szVirtualBoxHome);
+    L_TRACE("g_szVirtualBoxHome: {0}", g_szVirtualBoxHome);
 
     memset(g_szVBoxManager, 0, sizeof(g_szVBoxManager));
     sprintf(g_szVBoxManager, "%s\\%s", g_szProgmaFiles, VBOXMANAGER_NAME);
@@ -117,10 +119,10 @@ bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& m
 
     url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/record");
 
-    printf("************ %s @ %d START EMIT\n", __FUNCTION__, __LINE__);
+    L_TRACE("************ {0} @ {1} START EMIT", __FUNCTION__, __LINE__);
     emit HttpPostData(url_str, json_str, reply_str);
-    printf("************ %s @ %d END EMIT\n", __FUNCTION__, __LINE__);
-    printf("reply: = %s\n", reply_str->c_str());
+    L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
+    L_TRACE("reply: = {0}", reply_str->c_str());
 
     // todo: ret
     return true;
@@ -164,14 +166,14 @@ void QuickOnService::QueryPortRnd(int& http_port, int& https_port)
     std::uniform_int_distribution<> dis(8000, 9000);
     http_port = dis(gen);
     https_port = dis(gen);
-    printf("------>>>> HTTP = %d, HTTPS = %d\n", http_port, https_port);
+    L_TRACE("------>>>> HTTP = {0}, HTTPS = {1}", http_port, https_port);
 }
 
 void QuickOnService::PrepareCMD()
 {
     SECURITY_ATTRIBUTES saAttr;
 
-    printf("\n->Start of parent execution.\n");
+    L_TRACE("->Start of parent execution");
 
     // Set the bInheritHandle flag so pipe handles are inherited.
     saAttr.nLength = sizeof(SECURITY_ATTRIBUTES);
@@ -229,14 +231,14 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
     va_end(ap);
 
     DWORD dwRead, dwWritten;
-    printf("** START EXEC %s\n", szCmd);
+    L_TRACE("** START EXEC {0}", szCmd);
     if (proxy && service) proxy->toSend(service->getInfoMsg(szCmd));
 
     if (!strstr(szCmd, "\r\n"))
         strcat(szCmd, "\r\n");
     if (!WriteFile(g_hChildStd_IN_Wr, szCmd, strlen(szCmd), &dwWritten, NULL) || !dwWritten)
     {
-        printf("write %s failed\n", szCmd);
+        L_ERROR("write {0} failed", szCmd);
         return -1;
     }
 
@@ -247,7 +249,7 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
     {
         if (!PeekNamedPipe(g_hChildStd_OUT_Rd, NULL, 0, NULL, &dwTotalBytesAvail, NULL))
         {
-            printf("PeekNamedPipe failed\n");
+            L_TRACE("PeekNamedPipe failed");
             break;
         }
 
@@ -259,7 +261,7 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
 
         if (!ReadFile(g_hChildStd_OUT_Rd, read_buffer + dwTotalRead, dwTotalBytesAvail, &dwRead, NULL))
         {
-            printf("ReadFile Failed\n");
+            L_TRACE("ReadFile Failed");
             break;
         }
 
@@ -305,8 +307,8 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
         d += strlen(szCmd);
         memmove(read_buffer, d, strlen(d) + 1);
     }
-    printf("*** EXEC Result: %s\n\n", read_buffer);
-    printf("====================== DONE ======================\n");
+    L_TRACE("*** EXEC Result: {0}", read_buffer);
+    L_TRACE("====================== DONE ======================");
 
     return dwRead;
 }
@@ -326,13 +328,13 @@ void QuickOnService::SetupSignal()
     QueryUrlLocal(domain);
     QueryPortLocal(http_port, https_port);
 
-    printf("======> %d - %d\n", http_port, https_port);
+    L_TRACE("======> {0} - {1}", http_port, https_port);
     emit NotifyQuickOnInfo(domain, http_port, https_port);
 }
 
 bool QuickOnService::installServiceImpl(SendProxy *proxy)
 {
-    printf("%s @ %d", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     char read_buffer[40960] = { 0 };
     if (IsInstalled() != 0)
@@ -342,7 +344,7 @@ bool QuickOnService::installServiceImpl(SendProxy *proxy)
 
     if (IsOvaExist(read_buffer) <= 0 && ImportOVA(read_buffer) <= 0)
     {
-        printf("%s @ %d FAILED", __FUNCTION__, __LINE__);
+        L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
         return false;
     }
         
@@ -351,7 +353,7 @@ bool QuickOnService::installServiceImpl(SendProxy *proxy)
 
 QString QuickOnService::queryState()
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
     if (IsInstalled() != 0)
         return ConstUtil::U_SERVICE_UNKNOWN;
 
@@ -379,16 +381,16 @@ bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::startServiceImpl(SendProxy *proxy)
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
     std::shared_ptr<std::string> domain(new std::string);
     std::string message;
     if (!QueryUrl(domain, message))
     {
-        printf("QueryUrl Failed: %s @ %d\n", __FUNCTION__, __LINE__);
+        L_ERROR("QueryUrl Failed: {0} @ {1}", __FUNCTION__, __LINE__);
         proxy->toSend(getErrorMsg(message.c_str()));
         return false;
     }
-    printf("-------------------- %s @ %d: %s\n", __FUNCTION__, __LINE__, domain->c_str());
+    L_TRACE("{0} @ {1} domain: {2}", __FUNCTION__, __LINE__, domain->c_str());
 
     int http_port = 0, https_port = 0;
     QueryPortLocal(http_port, https_port);
@@ -463,14 +465,14 @@ bool QuickOnService::stopServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::killServiceImpl(SendProxy *proxy)
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     return Service::killServiceImpl(proxy);
 }
 
 bool QuickOnService::restartServiceImpl(SendProxy *proxy)
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     Service::restartServiceImpl(proxy);
 
@@ -483,7 +485,7 @@ bool QuickOnService::restartServiceImpl(SendProxy *proxy)
 
 bool QuickOnService::lazyInstallServiceImpl(SendProxy *proxy)
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     return installServiceImpl(proxy);
 }
@@ -524,7 +526,7 @@ int QuickOnService::IsOvaExist(char* buf)
         return ret;
 
     char* p = strstr(buf, OVA_QUICKON_NAME);
-    printf("@#### %s\n", p ? "HAS OVA" : "NO OVA");
+    L_TRACE("#### {0}", p ? "HAS OVA" : "NO OVA");
     if (!p)
         return 0;
     
@@ -635,7 +637,7 @@ bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
     FILE* fp = fopen(local_file_name, "rt");
     if (!fp)
     {
-        printf("%s not exist\n", local_file_name);
+        L_ERROR("{0} not exist", local_file_name);
         return false;
     }
 
@@ -677,11 +679,11 @@ bool QuickOnService::QueryUrlNet(std::shared_ptr<std::string> domain, std::strin
 
     url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/custom");
 
-    printf("************ %s @ %d START EMIT\n", __FUNCTION__, __LINE__);
+    L_TRACE("************ {0} @ {1} START EMIT", __FUNCTION__, __LINE__);
     emit HttpPostData(url_str, json_str, reply_str);
     bool ret = !reply_str->empty();
-    printf("************ %s @ %d END EMIT\n", __FUNCTION__, __LINE__);
-    printf("reply = %s\n\n", reply_str->c_str());
+    L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
+    L_TRACE("reply = {0}", reply_str->c_str());
     QJsonParseError e;
     doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
     if (doc.isNull() || e.error != QJsonParseError::NoError)
@@ -690,14 +692,14 @@ bool QuickOnService::QueryUrlNet(std::shared_ptr<std::string> domain, std::strin
     if (!ret || doc["code"].toInt() != 200)
     {
         message = doc["message"].toString().toStdString();
-        printf("%s @ %d\n", __FUNCTION__, __LINE__);
+        L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
         return false;
     }
 
     auto data = doc["data"];
     if (data.isUndefined() || data.isNull())
     {
-        printf("%s @ %d\n", __FUNCTION__, __LINE__);
+        L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
         return false;
     }
 
@@ -755,7 +757,7 @@ void QuickOnService::SaveInitEnv(std::shared_ptr<std::string> domain, int http_p
     FILE* fp = fopen(local_file_name, "w+t");
     if (!fp)
     {
-        printf("ERROR: Can not open file %s\n", local_file_name);
+        L_ERROR("Can not open file {0}", local_file_name);
         return;
     }
 
@@ -935,13 +937,12 @@ static bool EnumAdaptersInfo(std::string& local_ip, const std::vector<std::strin
             if (std::find(physical_cards.begin(), physical_cards.end(), p->Description) == physical_cards.end())
                 continue;
 
-            printf("name: %s\n", p->AdapterName);
-            printf("desc: %s\n", p->Description);
+            L_TRACE("name: {0}, desc: {1}", p->AdapterName, p->Description);
             //可能网卡有多IP,因此通过循环去判断
             IP_ADDR_STRING* pIpAddrString = &(p->IpAddressList);
             do
             {
-                printf("### addr: %s\n", pIpAddrString->IpAddress.String);
+                L_TRACE("### addr: {0}", pIpAddrString->IpAddress.String);
 
                 if (strlen(pIpAddrString->IpAddress.String) && strcmp(pIpAddrString->IpAddress.String, "0.0.0.0"))
                 {

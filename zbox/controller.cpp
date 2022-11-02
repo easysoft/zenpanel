@@ -15,6 +15,8 @@
 #include "runners/serviceinstaller.h"
 #include "services/quickonservice.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QMap>
@@ -60,12 +62,12 @@ Controller::Controller()
         }
     }
 
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
     updateAppState();
-    printf("%s @ %d extractParamValues", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1} extractParamValues", __FUNCTION__, __LINE__);
     extractParamValues();
     
-    printf("%s @ %d MainWindow", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1} MainWindow", __FUNCTION__, __LINE__);
     m_mainWin = new MainWindow(this);
     
     // 这里需要用 m_mainWin
@@ -407,7 +409,7 @@ void Controller::extractParamValues()
 
 void Controller::updateAppState(bool forcedQuery)
 {
-    printf("%s @ %d\n", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
     if(forcedQuery == true)
     {
         foreach(Service *service,m_serviceList)
@@ -768,8 +770,6 @@ void Controller::onServiceStateChanged(QString typeAndState)
 
 void Controller::toActiveWindow(const QString &)
 {
-    printf("111111111111111111111111111\n\n");
-
     m_mainWin->raise();
     m_mainWin->activateWindow();
     m_mainWin->show();

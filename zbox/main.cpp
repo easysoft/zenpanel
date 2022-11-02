@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     parser.process(a);
     if (CheckEnv(parser))
     {
-        printf("check env failed\n");
+        L_ERROR("check env failed\n");
         return 0;
     }
 
@@ -145,7 +145,7 @@ static int CheckEnv(QCommandLineParser& parser)
     if (!IsWindowsServer()) // win
     {
         processor = parser.value("p").toULongLong();
-        printf(">>>> processor = %lld -- %lld\n", processor, parser.value("P").toULongLong());
+        L_TRACE(">>>> processor = {0} -- {1}", processor, parser.value("P").toULongLong());
         if (si.dwNumberOfProcessors < processor)
         {
             tip = u8"需要" + QString(std::to_string(processor).c_str()) + u8"核心以上处理器";
@@ -154,7 +154,7 @@ static int CheckEnv(QCommandLineParser& parser)
         }
 
         mem_limit = parser.value("m").toULongLong();
-        printf(">>>> memory = %lld -- %lld\n", mem_limit, parser.value("M").toULongLong());
+        L_TRACE(">>>> memory = {0} -- {1}", mem_limit, parser.value("M").toULongLong());
         if (mem.ullTotalPhys < (uint64_t)(mem_limit * gb))
         {
             tip = u8"需要" + QString(std::to_string(mem_limit).c_str()) + u8"GB以上内存";
@@ -163,7 +163,7 @@ static int CheckEnv(QCommandLineParser& parser)
         }
 
         disk_limit = parser.value("d").toULongLong();
-        printf(">>>> disk = %lld -- %lld\n", disk_limit, parser.value("D").toULongLong());
+        L_TRACE(">>>> disk = {0} -- {1}", disk_limit, parser.value("D").toULongLong());
         if (bytes_free.QuadPart < (uint64_t)(disk_limit * gb))
         {
             tip = u8"需要" + QString(std::to_string(disk_limit).c_str()) + u8"GB以上硬盘";

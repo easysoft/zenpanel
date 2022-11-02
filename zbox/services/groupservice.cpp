@@ -11,6 +11,8 @@
 #include "base/sendproxy.h"
 #include "mainwindow.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QtMath>
 
 GroupService::GroupService(Controller *controllor,Yaml2Stream *config,QString type):
@@ -255,19 +257,16 @@ void GroupService::createMembers()
         QString key = members[0].toLower();
 
         Yaml2Stream *config = new Yaml2Stream(node);
+        L_TRACE("{0} @ {1}: new {2}", __FUNCTION__, __LINE__, key.toStdString().c_str());
 
         if(key == "apache")
         {
-            printf("%s @ %d: new apache\n", __FUNCTION__, __LINE__);
-            system("pause");
             ApacheService *service = new ApacheService(m_ctr,config,key);
             service->SetParent(this);
             m_members.append(service);
         }
         else if(key == "mysql")
         {
-            printf("%s @ %d: new mysql\n", __FUNCTION__, __LINE__);
-            system("pause");
             MysqlService *service = new MysqlService(m_ctr,config,key);
             service->SetParent(this);
             m_members.append(service);

@@ -1,6 +1,8 @@
 #include "processutil.h"
 #include "utils/constutil.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QDebug>
 
 InfoResult ProcessUtil::excuteShell(QString command)
@@ -13,7 +15,7 @@ InfoResult ProcessUtil::excuteCommand(QString command,QStringList params)
     bool ret;
     QProcess process;
 
-    printf("&&&&&&&&&& %s\n", command.toStdString().c_str());
+    L_TRACE("&&&&&&&&&& {0}", command.toStdString().c_str());
     if(params.length() >0)
         process.start(command,params);
     else

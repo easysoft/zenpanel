@@ -6,6 +6,8 @@
 #include "base/gparams.h"
 #include "utils/envutil.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -238,7 +240,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     QString selfServiceState = this->queryState();
     if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
-        printf("%s : %s\n", __FUNCTION__, selfServiceState.toStdString().c_str());
+        L_ERROR("%s : %s\n", __FUNCTION__, selfServiceState.toStdString().c_str());
         return false;
     }
 
@@ -254,7 +256,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     bool configResult = installConfig(false,proxy);
     if(configResult == false)
     {
-        printf("%s : configResult\n", __FUNCTION__);
+        L_ERROR("{0} : configResult", __FUNCTION__);
         return false;
     }
 
@@ -263,7 +265,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
         if(m_commandList[i].content.isEmpty() == true)
         {
             proxy->toSend(getErrorMsg("message.errorCommandNot", this->title(),this->port()));
-            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
+            L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
             return false;
         }
     }
@@ -274,7 +276,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
 
         if(!excCommand(m_commandList[i],proxy))
         {
-            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
+            L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
             return false;
         }
 
@@ -287,7 +289,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
 
         if(!excCommand(m_commandList[i],proxy))
         {
-            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
+            L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
             return false;
         }
 
@@ -306,7 +308,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
 
             if(!startService(proxy))
             {
-                printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
+                L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
                 return false;
             }
 
@@ -320,7 +322,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
 
         if(!excCommand(m_commandList[i],proxy))
         {
-            printf("%s @ %d FAILED\n", __FUNCTION__, __LINE__);
+            L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
             return false;
         }
 
