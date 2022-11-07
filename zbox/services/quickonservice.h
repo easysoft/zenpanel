@@ -45,7 +45,7 @@ public:
     static void PrepareCMD();
     static int ExecCmd(char read_buffer[], Service *service, SendProxy *proxy, const char* fmt, ...);
 
-    virtual QString queryState() override;
+//    virtual QString queryState() override;
 
 signals:
     void HttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);

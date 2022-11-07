@@ -66,7 +66,7 @@ Controller::Controller()
     updateAppState();
     L_TRACE("{0} @ {1} extractParamValues", __FUNCTION__, __LINE__);
     extractParamValues();
-    
+
     L_TRACE("{0} @ {1} MainWindow", __FUNCTION__, __LINE__);
     m_mainWin = new MainWindow(this);
     
@@ -375,6 +375,7 @@ void Controller::createSerivceList()
             }
             else if (key == "quickon")
             {
+                L_TRACE("=========> {0}", key.toStdString().c_str());
                 QuickOnService *serivce = new QuickOnService(this,config,key);
                 m_serviceList.append(serivce);
             }
@@ -409,22 +410,30 @@ void Controller::extractParamValues()
 
 void Controller::updateAppState(bool forcedQuery)
 {
-    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
+    L_TRACE("{0} @ {1} && {2}", __FUNCTION__, __LINE__, forcedQuery ? "true" : "false");
     if(forcedQuery == true)
     {
+        L_TRACE("m_serviceList size = {0}", m_serviceList.count());
         foreach(Service *service,m_serviceList)
+        {
+            L_TRACE("######### {0} @ {1}", __FUNCTION__, __LINE__);
             service->refreshState();
+            L_TRACE("!!!!!!!!! {0} @ {1}", __FUNCTION__, __LINE__);
+        }
     }
 
+    L_TRACE("==========>>>> {0} @ {1}", __FUNCTION__, __LINE__);
     int start_pending = 0;
     int running = 0;
     int paused = 0;
     int stop_pending = 0;
     int stopped = 0;
     int unknown = 0;
+    
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     QList<Service*> serviceList = queryServiceList(false,false);
-
+    L_TRACE("serviceList size = {0}", serviceList.count());
     foreach(Service *service,serviceList)
     {
         QString iState = service->state();
@@ -457,6 +466,7 @@ void Controller::onAppStateChanged()
 bool Controller::isPreInstalled()
 {
     return true;
+
     bool apacheInstalled = false;
     bool mysqlInstalled = false;
 

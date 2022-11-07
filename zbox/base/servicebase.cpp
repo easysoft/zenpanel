@@ -63,7 +63,7 @@ QString ServiceBase::sourcePath()
 QString ServiceBase::serviceName()
 {
     QString _serviceName = m_config->getString("serviceName");
-
+    L_TRACE("{0} @ {1} : <<{2}>>", __FUNCTION__, __LINE__, _serviceName.toStdString().c_str());
     if(_serviceName.isEmpty() == true)
         return type();
 
@@ -430,6 +430,7 @@ bool ServiceBase::isWindowService()
 void ServiceBase::refreshState()
 {
     m_state = queryState();
+    L_TRACE("{0} {1} @ {2} {3}", __FILE__, __FUNCTION__, __LINE__, m_state.toStdString().c_str());
 }
 
 bool ServiceBase::modifyUser()

@@ -10,6 +10,8 @@
 #include "servicehelper.h"
 #include "controls/askconfirm.h"
 
+#include "spdlogwrapper.hpp"
+
 #include <QStyle>
 #include <QApplication>
 
@@ -200,11 +202,14 @@ void ServiceControl::initMenu()
 
 void ServiceControl::refreshState()
 {
+    L_TRACE("{0} @ {1} - {2}", __FILE__, __FUNCTION__, __LINE__);
     QString icon;
     QString iconCss;
     QString lblCss;
     QString descTpl;
     QString iconSize = "normal";
+
+    L_TRACE("{0} @ {1}: m_state = {2}", __FUNCTION__, __LINE__, m_state.toStdString().c_str());
 
     if(m_state == ConstUtil::STATE_START_ING)
     {
@@ -364,10 +369,13 @@ void ServiceControl::refreshMenu()
     m_startServiceAction->setEnabled(false);
 
     QString serviceState = m_service->queryState();
-    bool isPreInstalled = m_ctr->isPreInstalled();
+//    bool isPreInstalled = m_ctr->isPreInstalled();
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
-    if(m_service->ignore() == true && isPreInstalled == false)
+    if(m_service->ignore() == true/* && isPreInstalled == false*/)
         return;
+
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
     if(serviceState == ConstUtil::U_SERVICE_RUNNING)
     {

@@ -5,6 +5,7 @@
 #include "utils/constutil.h"
 #include "hardware/hardwareinfo.h"
 #include "mainwindow.h"
+#include "utils/processutil.h"
 
 #include "spdlogwrapper.hpp"
 
@@ -350,10 +351,15 @@ bool QuickOnService::installServiceImpl(SendProxy *proxy)
         
     return Service::installServiceImpl(proxy);
 }
-
+/*
 QString QuickOnService::queryState()
 {
-    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
+    QString nowServiceName = serviceName();
+    QString status = ProcessUtil::serviceState(nowServiceName);
+    L_TRACE("{0} @ {1} - nowServiceName: {2}, status: {3}", __FUNCTION__, __LINE__, nowServiceName.toStdString().c_str(), status.toStdString().c_str());
+    if (status == ConstUtil::U_SERVICE_UNKNOWN)
+        return ConstUtil::U_SERVICE_UNKNOWN;
+
     if (IsInstalled() != 0)
         return ConstUtil::U_SERVICE_UNKNOWN;
 
@@ -361,9 +367,9 @@ QString QuickOnService::queryState()
     if (IsOvaExist(buf) <= 0)
         return ConstUtil::U_SERVICE_UNKNOWN;
 
-    return Service::queryState();
+    return status;
 }
-
+*/
 bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
 {
     Service::uninstallServiceImpl(proxy);
@@ -382,6 +388,18 @@ bool QuickOnService::uninstallServiceImpl(SendProxy *proxy)
 bool QuickOnService::startServiceImpl(SendProxy *proxy)
 {
     L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
+    char read_buffer[40960] = { 0 };
+    if (IsInstalled() != 0)
+        RunVirtualBoxMSI(read_buffer);
+
+    VBoxManageFullPath();
+
+    if (IsOvaExist(read_buffer) <= 0 && ImportOVA(read_buffer) <= 0)
+    {
+        L_ERROR("{0} @ {1} FAILED", __FUNCTION__, __LINE__);
+        return false;
+    }
+
     std::shared_ptr<std::string> domain(new std::string);
     std::string message;
     if (!QueryUrl(domain, message))
@@ -403,7 +421,6 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
 
     emit NotifyQuickOnInfo(domain, 0, 0);
 
-    char read_buffer[3000] = { 0 };
     // 启动虚拟机
     printf("$$$$$$$$$$ %s @ %d: startvm\n", __FUNCTION__, __LINE__);
     if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)

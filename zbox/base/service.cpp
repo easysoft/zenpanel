@@ -240,7 +240,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     QString selfServiceState = this->queryState();
     if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
-        L_ERROR("%s : %s\n", __FUNCTION__, selfServiceState.toStdString().c_str());
+        L_ERROR("{0} : {1}", __FUNCTION__, selfServiceState.toStdString().c_str());
         return false;
     }
 

@@ -1,3 +1,3 @@
 Delete zbox.pro.user
-.vscode
-zbox.pro.user*
+.vscode/*
+zbox.pro.user.*
