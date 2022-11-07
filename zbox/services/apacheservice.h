@@ -13,6 +13,15 @@ public:
 
     InfoResult changePort(QString newPort);
     InfoResult changeUser(QString newAccount, QString newPassword);
+
+protected:
+    virtual bool installServiceImpl(SendProxy *proxy) override;
+    virtual bool uninstallServiceImpl(SendProxy *proxy) override;
+    virtual bool startServiceImpl(SendProxy *proxy) override;
+    virtual bool stopServiceImpl(SendProxy *proxy) override;
+    virtual bool killServiceImpl(SendProxy *proxy) override;
+    virtual bool restartServiceImpl(SendProxy *proxy) override;
+    virtual bool lazyInstallServiceImpl(SendProxy *proxy) override;
 };
 
 #endif // APACHESERVICEOPER_H

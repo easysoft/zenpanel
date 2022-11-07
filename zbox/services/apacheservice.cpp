@@ -65,3 +65,38 @@ QString ApacheService::versionCommand()
 
     return exefullPath + " " + versionLine;
 }
+
+bool ApacheService::installServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::uninstallServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::startServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::stopServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::killServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::restartServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
+
+bool ApacheService::lazyInstallServiceImpl(SendProxy *proxy)
+{
+    return true;
+}
