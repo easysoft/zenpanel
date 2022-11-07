@@ -9,6 +9,7 @@
 #include "base/inforesult.h"
 #include "controls/askconfirm.h"
 #include "runners/serviceinstaller.h"
+#include "spdlogwrapper.hpp"
 
 #include <QClipboard>
 #include <QApplication>

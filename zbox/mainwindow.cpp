@@ -274,7 +274,7 @@ void MainWindow::adjustAfterLang()
     m_globalControl->adjustAfterChanged();
     m_serviceContainer->adjustAfterLangChanged();
     m_logContainer->adjustAfterChanged();
-    m_apacheSetting->adjustAfterLangChanged();
+//    m_apacheSetting->adjustAfterLangChanged();
 
     adjustAfterLangImpl();
 }
@@ -578,13 +578,13 @@ void MainWindow::createMainUI()
     m_globalControl = new GlobalControl(m_ctr,this);
     m_serviceContainer = new ServiceContainer(m_ctr,this);
     m_logContainer = new LogContainer(m_ctr,this);
-    m_apacheSetting = new ApacheSetting(m_ctr,this);
+//    m_apacheSetting = new ApacheSetting(m_ctr,this);
 
     m_serviceContainer->setObjectName("serviceContainer");
 
     m_globalControl->show();
     m_serviceContainer->show();
-    m_apacheSetting->show();
+//    m_apacheSetting->show();
 
     connect(m_globalControl, SIGNAL(oneClickSetup()), this, SLOT(OneClickSetup()));
     connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));

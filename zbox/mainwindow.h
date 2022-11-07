@@ -60,7 +60,7 @@ private:
     GlobalControl *m_globalControl;
     ServiceContainer *m_serviceContainer;
     LogContainer *m_logContainer;
-    ApacheSetting *m_apacheSetting;
+//    ApacheSetting *m_apacheSetting;
 
     QVBoxLayout *m_leftLayout;
 
