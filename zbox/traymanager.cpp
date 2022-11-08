@@ -48,6 +48,7 @@ void TrayManager::adjustAfterLang()
 
 void TrayManager::quit()
 {
+    m_tray->hide();
     QApplication::quit();
 }
 
