@@ -74,7 +74,7 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
 
     adjustAfterLang();
 
-    makeEnvironmentPath();
+//    makeEnvironmentPath();
 
     makeBasicsInfo();
 

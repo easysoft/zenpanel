@@ -47,20 +47,20 @@ Controller::Controller()
     createSubProductList();
     createSerivceList();
 
-    askOsArch();
+//    askOsArch();
 
     QList<Service*> allList;
     allList.append(m_mainProduct);
     foreach(ProductService *sub,m_subProductList) allList.append(sub);
     foreach(Service *service,m_serviceList) allList.append(service);
 
-    foreach(Service *base, allList)
-    {
-        if(ServiceHelper::checkVCEnvironment(base,m_userConfig) == false)
-        {
-            return;
-        }
-    }
+//    foreach(Service *base, allList)
+//    {
+//        if(ServiceHelper::checkVCEnvironment(base,m_userConfig) == false)
+//        {
+//            return;
+//        }
+//    }
 
     L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
     updateAppState();

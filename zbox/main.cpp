@@ -111,7 +111,7 @@ static int CheckEnv(QCommandLineParser& parser)
         QMessageBox::information(nullptr, u8"提示", u8"系统版本过低");
         return -1;
     }
-/*
+
     // VT-D
     char buf[1024] = { 0 };
     QuickOnService::ExecCmd(buf, nullptr, nullptr, "wmic cpu get VirtualizationFirmwareEnabled\r\n");
@@ -120,7 +120,7 @@ static int CheckEnv(QCommandLineParser& parser)
         QMessageBox::information(nullptr, u8"提示", u8"请先开启系统虚拟化");
         return 4;
     }
-*/
+
     SYSTEM_INFO si;
     GetSystemInfo(&si);
 
