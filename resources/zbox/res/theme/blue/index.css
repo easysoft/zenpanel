@@ -338,7 +338,7 @@ QPushButton[forUse='no'] {
     border-radius: 4px;
 }
 
-QWidget[forUse='quickon'] {
+QWidget[forUse='service'] {
     color: #ffffff;
     font-size: 14px;
     background-color: transparent;

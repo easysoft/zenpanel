@@ -33,7 +33,6 @@ QString ConstUtil::RX_PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[\\s\\S]{6,12}
 
 int ConstUtil::GRID_GAP = 16;
 
-
 int ConstUtil::itemWidth(int winHeight,int scaledGap)
 {
     int totalWidth = winHeight * 0.65;  //0.69

@@ -18,7 +18,8 @@
 #include "base/gbus.h"
 #include "base/gparams.h"
 
-ServiceControl::ServiceControl(Controller *ctr, Service *service, QWidget *parent) : QWidget(parent)
+ServiceControl::ServiceControl(Controller *ctr, Service *service, QWidget *parent) 
+    : QWidget(parent)
 {
     setAttribute(Qt::WA_StyledBackground);
     setProperty("forUse","service");
@@ -27,6 +28,8 @@ ServiceControl::ServiceControl(Controller *ctr, Service *service, QWidget *paren
     this->m_service = service;
 
     this->m_state = ConstUtil::STATE_INIT_SELF;
+
+    L_TRACE("@@@@@@@@@@@@@@@@ w = {0}, h = {1}; parent w ={2}, h = {3}", width(), height(), parent->width(), parent->height());
 }
 
 QString ServiceControl::type()
@@ -36,6 +39,7 @@ QString ServiceControl::type()
 
 void ServiceControl::init()
 {
+    /*
     m_mainLayout = new QVBoxLayout();
     this->setLayout(m_mainLayout);
 
@@ -97,11 +101,13 @@ void ServiceControl::init()
 //    m_btnMore->move(size().width() - m_btnMore->width() - ts(2), ts(3));
 
     initMenu();
+    */
     refreshState();
 }
 
 void ServiceControl::adjustAfterLangChanged()
 {
+    /*
     m_visitAction->setText(tlng("menu.visit"));
     m_viewLogAction->setText(tlng("menu.viewLog"));
     m_modifyPortAction->setText(tlng("menu.modifyPort"));
@@ -132,6 +138,7 @@ void ServiceControl::adjustAfterLangChanged()
     m_btnMore->move(size().width() - m_btnMore->width() - ts(2), ts(3));
 
     m_menu->setOffset(-ts(2),-ts(3)-m_btnMore->size().height());
+    */
 }
 
 void ServiceControl::stateChanged(QString state)
@@ -140,9 +147,9 @@ void ServiceControl::stateChanged(QString state)
     refreshState();
 }
 
+/*
 void ServiceControl::initMenu()
 {
-
     m_menu = new ZOffsetMenu(m_btnMore,this);
     m_menu->setProperty("forUse","menu");
     m_menu->setProperty("forRadius","radiusMenu");
@@ -199,7 +206,7 @@ void ServiceControl::initMenu()
 
     connect(m_menu,SIGNAL(aboutToShow()),this,SLOT(refreshMenu()));
 }
-
+*/
 void ServiceControl::refreshState()
 {
     L_TRACE("{0} @ {1} - {2}", __FILE__, __FUNCTION__, __LINE__);
@@ -316,7 +323,7 @@ void ServiceControl::refreshState()
             lblCss = "success";
         }
     }
-
+/*
     style()->unpolish(m_lblState);
     style()->unpolish(m_lblDesc);
 
@@ -324,7 +331,7 @@ void ServiceControl::refreshState()
     m_lblState->setProperty("forUse","icon" + iconCss);
     m_lblState->setProperty("forColor", iconCss);
     m_lblState->setProperty("iconSize",iconSize);
-
+*/
     m_descTpl = descTpl;
 
     MsgResult result;
@@ -332,7 +339,7 @@ void ServiceControl::refreshState()
     result.port = m_service->port();
     result.placeholder1 = m_service->port();
     QString disText = tlng(result);
-
+/*
     m_lblDesc->setText(disText);
     //m_lblDesc->setText("<p style='line-height:1px; width:100% ; white-space: pre-wrap; '>" + disText + "</p>");
     m_lblDesc->adjustSize();
@@ -344,6 +351,7 @@ void ServiceControl::refreshState()
 
     style()->polish(m_lblState);
     style()->polish(m_lblDesc);
+*/
 }
 
 void ServiceControl::onVisitClick()
@@ -358,6 +366,7 @@ void ServiceControl::onViewLogClick()
 
 void ServiceControl::refreshMenu()
 {
+    /*
     m_visitAction->setEnabled(false);
     m_viewLogAction->setEnabled(false);
     m_modifyPortAction->setEnabled(false);
@@ -372,7 +381,7 @@ void ServiceControl::refreshMenu()
 //    bool isPreInstalled = m_ctr->isPreInstalled();
     L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
 
-    if(m_service->ignore() == true/* && isPreInstalled == false*/)
+    if(m_service->ignore() == true)
         return;
 
     L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
@@ -438,6 +447,7 @@ void ServiceControl::refreshMenu()
         m_uninstallAction->setEnabled(true);
         m_startServiceAction->setEnabled(false);
     }
+    */
 }
 
 void ServiceControl::onModifyPortClick()

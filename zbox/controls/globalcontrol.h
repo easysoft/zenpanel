@@ -26,22 +26,28 @@ public:
 private:
     Controller *m_ctr;
 
-    QHBoxLayout *m_mainLayout;
+    QVBoxLayout m_mainLayer;
+    QPushButton m_btnStartQuickOn;
 
-    QPushButton *m_btnNotInstall;
-    QPushButton *m_btnIngInstall;
-    QPushButton *m_btnUninstall;
-    QPushButton *m_btnVisit;
-//    QPushButton *m_btnVisitQuickOn;
+    QWidget m_SettingWidget;
+    QVBoxLayout m_SettingLayout;
+    QLabel m_SettingTitle;
 
-    QWidget     *m_QuickOnWidget;
-    QVBoxLayout *m_QuickOnLayout;
-    QLabel      *m_QuickOnTitle;
-    QHBoxLayout *m_QuickOnDomainLayout;
-    QLineEdit   *m_QuickOnDomain0;
-    QLabel      *m_QuickOnDot;
-    QComboBox   *m_QuickOnDomain1;
-    QPushButton *m_QuickOnSave;
+    QHBoxLayout m_DomainLayer;
+    QLineEdit m_Domain0;
+    QLabel m_Dot;
+    QComboBox m_Domain1;
+
+    QLabel m_ValidDomain;
+    QPushButton m_SettingSave;
+
+    QLabel m_CurrentStatus;
+    QPushButton m_StopQuickOn;
+    QPushButton m_VisitQuickOnPage;
+    QLabel m_Usr;
+    QLineEdit m_UsrName;
+    QLabel m_Pass;
+    QLineEdit m_UsrPass;
 
     void preCreateUI();
 

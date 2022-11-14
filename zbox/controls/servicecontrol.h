@@ -15,6 +15,9 @@
 #include "base/glang.h"
 #include "base/zoffsetmenu.h"
 
+#include <QLineEdit>
+#include <QComboBox>
+
 class ServiceControl : public QWidget,GScale,GLang
 {
     Q_OBJECT
@@ -34,6 +37,7 @@ private:
     Controller *m_ctr;
     Service *m_service;
 
+/*
     QVBoxLayout *m_mainLayout;
     QHBoxLayout *m_firstRowLayout;
     QHBoxLayout *m_secondRowLayout;
@@ -62,8 +66,8 @@ private:
 
     ZOffsetMenu *m_menu;
 
-
     void initMenu();
+*/
     void refreshState();
 
 

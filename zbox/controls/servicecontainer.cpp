@@ -91,7 +91,7 @@ void ServiceContainer::createUI()
 
     for(int i=0;i<serviceList.length();i++)
     {
-        ServiceControl *control = new ServiceControl(m_ctr,serviceList[i],this);
+        ServiceControl *control = new ServiceControl(m_ctr,serviceList[i], static_cast<QWidget*>(parent()));
 
         control->init();
         m_controls.append(control);

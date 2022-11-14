@@ -29,6 +29,7 @@ Controller::Controller()
 {
     computeScale();
 
+/*
     if(checkApplicationPath() == false)
     {
         QString title = "错误提示";
@@ -38,7 +39,7 @@ Controller::Controller()
 
         return;
     }
-
+*/
     initInitConfig();
     initUserConfig();
     initLangConfig();
@@ -48,12 +49,12 @@ Controller::Controller()
     createSerivceList();
 
 //    askOsArch();
-
-    QList<Service*> allList;
-    allList.append(m_mainProduct);
-    foreach(ProductService *sub,m_subProductList) allList.append(sub);
-    foreach(Service *service,m_serviceList) allList.append(service);
-
+//
+//    QList<Service*> allList;
+//    allList.append(m_mainProduct);
+//    foreach(ProductService *sub,m_subProductList) allList.append(sub);
+//    foreach(Service *service,m_serviceList) allList.append(service);
+//
 //    foreach(Service *base, allList)
 //    {
 //        if(ServiceHelper::checkVCEnvironment(base,m_userConfig) == false)

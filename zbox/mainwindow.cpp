@@ -35,6 +35,25 @@
 
 MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     : QMainWindow(parent)
+    , m_QuickOnLayer()
+    , m_QuickOnWidget(this)
+    , m_btnStartQuickOn()
+    , m_SettingWidget()
+    , m_SettingLayout()
+    , m_SettingTitle()
+    , m_DomainLayer()
+    , m_Domain0()
+    , m_Dot()
+    , m_Domain1()
+    , m_ValidDomain()
+    , m_SettingSave()
+    , m_CurrentStatus()
+    , m_StopQuickOn()
+    , m_VisitQuickOnPage()
+    , m_Usr()
+    , m_UsrName()
+    , m_Pass()
+    , m_UsrPass()
     , m_HttpReq(this)
 {
     m_showLog = true;
@@ -68,9 +87,9 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     createFooter();
     createMainUI();
     createLeftUI();
-    createRightUI();
+//    createRightUI();
 
-    toggleLog();
+    connect(this, SIGNAL(togglelog()), this, SLOT(toggleLog()));
 
     adjustAfterLang();
 
@@ -83,6 +102,8 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
 
     QScreen *screen = this->getScreen();
     connect(screen, &QScreen::logicalDotsPerInchChanged, this, &MainWindow::resized);
+
+    emit togglelog();
 }
 
 MainWindow::~MainWindow()
@@ -115,6 +136,10 @@ void MainWindow::resized()
         hideLog();
 
     adjustAfterLang();
+
+    m_QuickOnWidget.move((width() - m_QuickOnWidget.width()) / 2, (height() - m_QuickOnWidget.height()) / 2);
+
+    L_DEBUG("===================================== {0}, {1}", width(), height());
 }
 
 void MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply)
@@ -143,7 +168,7 @@ void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, 
 
 void MainWindow::hideLog()
 {
-    m_btnSwitch->setText(QChar(0xe646));
+//    m_btnSwitch->setText(QChar(0xe646));
 
     m_logContainer->hide();
 
@@ -154,6 +179,8 @@ void MainWindow::hideLog()
 
 void MainWindow::showLog()
 {
+    return;
+
     m_btnSwitch->setText(QChar(0xe61e));
 
     m_logContainer->show();
@@ -171,6 +198,8 @@ void MainWindow::setLogWin()
     m_bgPixmap.load(bgPath);
 
     resize(ts(desireWidth(m_bgPixmap.width(),m_bgPixmap.height())),ts(m_desireHeight));
+
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
 }
 
 void MainWindow::setNologWin()
@@ -179,6 +208,8 @@ void MainWindow::setNologWin()
     m_bgPixmap.load(bgPath);
 
     resize(ts(desireWidth(m_bgPixmap.width(),m_bgPixmap.height())),ts(m_desireHeight));
+
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
 }
 
 void MainWindow::toggleLog()
@@ -271,7 +302,7 @@ void MainWindow::changeTheme(QString themeName)
 
 void MainWindow::adjustAfterLang()
 {
-    m_globalControl->adjustAfterChanged();
+//    m_globalControl->adjustAfterChanged();
     m_serviceContainer->adjustAfterLangChanged();
     m_logContainer->adjustAfterChanged();
 //    m_apacheSetting->adjustAfterLangChanged();
@@ -282,13 +313,6 @@ void MainWindow::adjustAfterLang()
 void MainWindow::adjustAfterLangImpl()
 {
     QSize mainSize = this->size();
-
-    //close right ui
-    m_btnSwitch->adjustSize();
-
-    QSize switchSize = m_btnSwitch->size();
-
-    m_btnSwitch->move(mainSize.height() - switchSize.width()*2, mainSize.height()/2-switchSize.height()/2);
 
     //left ui
     QSize leftSize = m_leftWidget->size();
@@ -364,8 +388,6 @@ void MainWindow::createLogo()
 
     logoPixmap.scaled(m_lblLogo->size(), Qt::KeepAspectRatio);
     m_lblLogo->setScaledContents(true);
-
-
     m_lblLogo->setPixmap(logoPixmap);
 
 //    QSize mainSize = this->size();
@@ -506,7 +528,6 @@ void MainWindow::createSetingMenu(QPushButton *btn)
     m_languageBtn->setPopup(langMenu);
     m_switchThemeBtn->setPopup(themeMenu);
 
-
     connect(m_viewServiceBtn,SIGNAL(clicked()),this,SLOT(onClickViewService()));
     connect(m_removeServiceBtn,SIGNAL(clicked()),this,SLOT(onClickUninstall()));
     connect(m_sysBackupBtn,SIGNAL(clicked()),this,SLOT(onClickBackup()));
@@ -575,20 +596,49 @@ void MainWindow::showMenu()
 
 void MainWindow::createMainUI()
 {
-    m_globalControl = new GlobalControl(m_ctr,this);
+//    m_globalControl = new GlobalControl(m_ctr,this);
     m_serviceContainer = new ServiceContainer(m_ctr,this);
     m_logContainer = new LogContainer(m_ctr,this);
 //    m_apacheSetting = new ApacheSetting(m_ctr,this);
 
     m_serviceContainer->setObjectName("serviceContainer");
 
-    m_globalControl->show();
+//    m_globalControl->show();
     m_serviceContainer->show();
 //    m_apacheSetting->show();
 
-    connect(m_globalControl, SIGNAL(oneClickSetup()), this, SLOT(OneClickSetup()));
-    connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));
-    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
+//    connect(m_globalControl, SIGNAL(oneClickSetup()), this, SLOT(OneClickSetup()));
+//    connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));
+//    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
+
+    m_QuickOnWidget.setProperty("forUse","QuickOn");
+    m_QuickOnWidget.setLayout(&m_QuickOnLayer);
+
+    m_QuickOnLayer.addWidget(&m_btnStartQuickOn);
+    m_QuickOnLayer.addWidget(&m_SettingWidget);
+    m_SettingWidget.setLayout(&m_SettingLayout);
+    m_SettingLayout.addWidget(&m_SettingTitle);
+    m_SettingLayout.addLayout(&m_DomainLayer);
+    m_DomainLayer.addWidget(&m_Domain0);
+    m_DomainLayer.addWidget(&m_Dot);
+    m_DomainLayer.addWidget(&m_Domain1);
+    m_SettingLayout.addWidget(&m_CustomizeDomain);
+    m_SettingLayout.addWidget(&m_ValidDomain);
+    m_SettingLayout.addWidget(&m_SettingSave);
+    m_QuickOnLayer.addWidget(&m_CurrentStatus);
+    m_QuickOnLayer.addWidget(&m_StartWidget);
+    m_StartWidget.setLayout(&m_StartLayer);
+    m_StartLayer.addLayout(&m_StartButtonsLayer);
+    m_StartButtonsLayer.addWidget(&m_StopQuickOn);
+    m_StartButtonsLayer.addWidget(&m_VisitQuickOnPage);
+    m_UserLayer.addWidget(&m_Usr);
+    m_UserLayer.addWidget(&m_UsrName);
+    m_UserLayer.addWidget(&m_Pass);
+    m_UserLayer.addWidget(&m_UsrPass);
+
+    m_btnStartQuickOn.setVisible(false);
+    m_StartWidget.setVisible(false);
+    m_CurrentStatus.setVisible(false);
 }
 
 void MainWindow::createRightUI()
