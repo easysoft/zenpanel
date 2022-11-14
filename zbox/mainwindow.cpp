@@ -724,19 +724,13 @@ void MainWindow::onClickUpdateHelp()
 
 void MainWindow::clickVisit()
 {
-    /*
+
     QString port = GParams::instance()->getParam("APACHE_PORT");
     QString launch = m_ctr->mainProductLaunch();
 
     QString url = "http://127.0.0.1:" + port + "/" + launch;
     if(port.isEmpty())
         url = "http://127.0.0.1/" + launch;
-    */
-    if (m_Domain.empty() || !m_HttpsPort)
-        return;
-
-    QString url;
-    url.append("https://").append(m_Domain.c_str()).append(":").append(std::to_string(m_HttpsPort).c_str());
     QDesktopServices::openUrl(QUrl(url));
 }
 
