@@ -37,6 +37,14 @@ class MainWindow : public QMainWindow,GScale,GLang
 {
     Q_OBJECT
 
+    enum
+    {
+        ST_REQDOMAIN = 0,
+        ST_CHECKHARDWARE,
+        ST_CHECKSERVICE,
+        ST_STARTSERVICE,
+    };
+
 public:
     MainWindow(Controller *ctr, QWidget *parent = nullptr);
     ~MainWindow();
@@ -163,13 +171,16 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
 
     QScreen* getScreen();
-
 protected:
     void closeEvent(QCloseEvent *event);
     void paintEvent(QPaintEvent *event);
 
 signals:
     void togglelog();
+    void SetupQuickOnInitStatus();
+    void SetupQuickOnSettingStatus();
+    void SetupQuickOnCurrentStatus(int stat);
+    void SetupQuickOnStartStatus();
     
 private slots:
     void toggleLog();
@@ -186,7 +197,6 @@ private slots:
     void OneClickSetup();
     void oneClickStop();
 
-
     void clickVisit();
 
     void showMenu();
@@ -195,5 +205,11 @@ private slots:
 
     void OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
     void OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port);
+
+    void OnSetupQuickOnInitStatus();
+    void OnSetupQuickOnSettingStatus();
+    void OnSetupQuickOnCurrentStatus(int stat);
+    void OnSetupQuickOnStartStatus();
 };
+
 #endif // MAINWINDOW_H

@@ -134,8 +134,6 @@ void GlobalControl::createNotInstallUI()
 
     m_mainLayer.addWidget(&m_btnStartQuickOn);
 
-    m_btnStartQuickOn.setText("m_btnStartQuickOn");
-
     connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SLOT(sendOneSetup()));
 }
 

@@ -18,6 +18,7 @@
 #include <QDesktopWidget>
 #include <QApplication>
 #include <QStyle>
+#include <QStringListModel>
 
 
 #include "utils/envutil.h"
@@ -103,6 +104,7 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     QScreen *screen = this->getScreen();
     connect(screen, &QScreen::logicalDotsPerInchChanged, this, &MainWindow::resized);
 
+    emit SetupQuickOnInitStatus();
     emit togglelog();
 }
 
@@ -164,6 +166,65 @@ void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, 
     m_HttpsPort = https_port;
 
     L_TRACE("======> HttpPort: {0} -- HttpsPort: {1}", m_HttpPort, m_HttpsPort);
+}
+
+// Setup UI status
+void MainWindow::OnSetupQuickOnInitStatus()
+{
+    m_btnStartQuickOn.setVisible(false);
+    m_SettingWidget.setVisible(true);
+    m_CurrentStatus.setVisible(false);
+    m_StartWidget.setVisible(false);
+}
+
+void MainWindow::OnSetupQuickOnSettingStatus()
+{
+    m_btnStartQuickOn.setVisible(false);
+    m_SettingWidget.setVisible(true);
+    m_CurrentStatus.setVisible(false);
+    m_StartWidget.setVisible(false);
+}
+
+void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
+{
+    m_btnStartQuickOn.setVisible(false);
+    m_SettingWidget.setVisible(false);
+    m_CurrentStatus.setVisible(true);
+    m_StartWidget.setVisible(false);
+
+    switch (stat)
+    {
+    case ST_REQDOMAIN:
+    {
+        m_CurrentStatus.setText(u8"正在申请域名证书...");
+    }
+    break;
+    case ST_CHECKHARDWARE:
+    {
+        m_CurrentStatus.setText(u8"正在检查硬件配置...");
+    }
+    break;
+    case ST_CHECKSERVICE:
+    {
+        m_CurrentStatus.setText(u8"正在检查系统服务...");
+    }
+    break;
+    case ST_STARTSERVICE:
+    {
+        m_CurrentStatus.setText(u8"正在启动渠成服务...");
+    }
+    break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::OnSetupQuickOnStartStatus()
+{
+    m_btnStartQuickOn.setVisible(false);
+    m_SettingWidget.setVisible(false);
+    m_CurrentStatus.setVisible(false);
+    m_StartWidget.setVisible(true);
 }
 
 void MainWindow::hideLog()
@@ -371,7 +432,15 @@ void MainWindow::adjustAfterLangImpl()
 
     m_menuWidget->adjustAfterLang();
 
-
+    // QuickOn
+    m_btnStartQuickOn.setText(tlng("quickon.start"));
+    m_SettingTitle.setText(tlng("quickon.title"));
+    m_Dot.setText(tlng("quickon.dot"));
+    auto domain = tlng("quickon.domain");
+    QStringListModel* domain_list = new QStringListModel;
+    domain_list->setStringList(domain.split(","));
+    m_Domain1.setModel(domain_list);
+        
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
 }
@@ -611,6 +680,12 @@ void MainWindow::createMainUI()
 //    connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));
 //    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
 
+    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnInitStatus()));
+    connect(this, SIGNAL(SetupQuickOnInitStatus()), this, SLOT(OnSetupQuickOnInitStatus()));
+    connect(this, SIGNAL(SetupQuickOnSettingStatus()), this, SLOT(OnSetupQuickOnSettingStatus()));
+    connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
+    connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
+
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
 
@@ -635,10 +710,6 @@ void MainWindow::createMainUI()
     m_UserLayer.addWidget(&m_UsrName);
     m_UserLayer.addWidget(&m_Pass);
     m_UserLayer.addWidget(&m_UsrPass);
-
-    m_btnStartQuickOn.setVisible(false);
-    m_StartWidget.setVisible(false);
-    m_CurrentStatus.setVisible(false);
 }
 
 void MainWindow::createRightUI()
@@ -774,14 +845,6 @@ void MainWindow::onClickUpdateHelp()
 
 void MainWindow::clickVisit()
 {
-    /*
-    QString port = GParams::instance()->getParam("APACHE_PORT");
-    QString launch = m_ctr->mainProductLaunch();
-
-    QString url = "http://127.0.0.1:" + port + "/" + launch;
-    if(port.isEmpty())
-        url = "http://127.0.0.1/" + launch;
-    */
     if (m_Domain.empty() || !m_HttpsPort)
         return;
 
