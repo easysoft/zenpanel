@@ -171,8 +171,8 @@ void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, 
 // Setup UI status
 void MainWindow::OnSetupQuickOnInitStatus()
 {
-    m_btnStartQuickOn.setVisible(false);
-    m_SettingWidget.setVisible(true);
+    m_btnStartQuickOn.setVisible(true);
+    m_SettingWidget.setVisible(false);
     m_CurrentStatus.setVisible(false);
     m_StartWidget.setVisible(false);
 }
@@ -440,6 +440,13 @@ void MainWindow::adjustAfterLangImpl()
     QStringListModel* domain_list = new QStringListModel;
     domain_list->setStringList(domain.split(","));
     m_Domain1.setModel(domain_list);
+    m_CustomizeDomain.setText(tlng("quickon.customize"));
+    m_SettingSave.setText(tlng("quickon.save"));
+
+    m_StopQuickOn.setText(tlng("quickon.stop"));
+    m_VisitQuickOnPage.setText(tlng("quickon.visit"));
+    m_Usr.setText(tlng("quickon.usr"));
+    m_Pass.setText(tlng("quickon.pass"));
         
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
@@ -680,25 +687,26 @@ void MainWindow::createMainUI()
 //    connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));
 //    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
 
-    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnInitStatus()));
     connect(this, SIGNAL(SetupQuickOnInitStatus()), this, SLOT(OnSetupQuickOnInitStatus()));
+    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnSettingStatus()));
     connect(this, SIGNAL(SetupQuickOnSettingStatus()), this, SLOT(OnSetupQuickOnSettingStatus()));
+    connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnStartStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
     connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
 
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
 
-    m_QuickOnLayer.addWidget(&m_btnStartQuickOn);
+    m_QuickOnLayer.addWidget(&m_btnStartQuickOn, 0, Qt::AlignHCenter);
     m_QuickOnLayer.addWidget(&m_SettingWidget);
     m_SettingWidget.setLayout(&m_SettingLayout);
-    m_SettingLayout.addWidget(&m_SettingTitle);
+    m_SettingLayout.addWidget(&m_SettingTitle, 0, Qt::AlignHCenter);
     m_SettingLayout.addLayout(&m_DomainLayer);
     m_DomainLayer.addWidget(&m_Domain0);
     m_DomainLayer.addWidget(&m_Dot);
     m_DomainLayer.addWidget(&m_Domain1);
-    m_SettingLayout.addWidget(&m_CustomizeDomain);
-    m_SettingLayout.addWidget(&m_ValidDomain);
+    m_SettingLayout.addWidget(&m_CustomizeDomain, 0, Qt::AlignHCenter);
+    m_SettingLayout.addWidget(&m_ValidDomain, 0, Qt::AlignHCenter);
     m_SettingLayout.addWidget(&m_SettingSave);
     m_QuickOnLayer.addWidget(&m_CurrentStatus);
     m_QuickOnLayer.addWidget(&m_StartWidget);
@@ -706,6 +714,7 @@ void MainWindow::createMainUI()
     m_StartLayer.addLayout(&m_StartButtonsLayer);
     m_StartButtonsLayer.addWidget(&m_StopQuickOn);
     m_StartButtonsLayer.addWidget(&m_VisitQuickOnPage);
+    m_StartLayer.addLayout(&m_UserLayer);
     m_UserLayer.addWidget(&m_Usr);
     m_UserLayer.addWidget(&m_UsrName);
     m_UserLayer.addWidget(&m_Pass);
