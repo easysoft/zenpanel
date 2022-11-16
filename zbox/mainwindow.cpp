@@ -55,6 +55,7 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     , m_UsrName()
     , m_Pass()
     , m_UsrPass()
+    , m_InitMoveTimer(this)
     , m_HttpReq(this)
 {
     m_showLog = true;
@@ -81,6 +82,10 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
 
     m_globalControl = nullptr;
 
+    m_InitMoveTimer.setInterval(3);
+	m_InitMoveTimer.setSingleShot(true);
+    connect(&m_InitMoveTimer, SIGNAL(timeout()), this, SLOT(OnInitMoveWindow()));
+
     loadLang();
     loadTheme(); 
 
@@ -106,6 +111,8 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
 
     emit SetupQuickOnInitStatus();
     emit togglelog();
+
+    m_InitMoveTimer.start();
 }
 
 MainWindow::~MainWindow()
@@ -225,6 +232,17 @@ void MainWindow::OnSetupQuickOnStartStatus()
     m_SettingWidget.setVisible(false);
     m_CurrentStatus.setVisible(false);
     m_StartWidget.setVisible(true);
+}
+
+void MainWindow::OnCustomizeDomain(int state)
+{
+    L_INFO("{0} @ {1}: {2}", __FUNCTION__, __LINE__, state);
+}
+
+void MainWindow::OnInitMoveWindow()
+{
+    resized();
+    L_DEBUG("=========>>>>>>> {0}, {1}", __FUNCTION__, __LINE__);
 }
 
 void MainWindow::hideLog()
@@ -693,6 +711,7 @@ void MainWindow::createMainUI()
     connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnStartStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
     connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
+    connect(&m_CustomizeDomain, SIGNAL(stateChanged(int)), this, SLOT(OnCustomizeDomain(int)));
 
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
@@ -904,6 +923,28 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
+        if (m_CustomizeDomain.isVisible())
+        {
+            QRect geometry = m_CustomizeDomain.geometry();
+            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
+            if (geometry.contains(pt))
+            {
+                m_CustomizeDomain.setChecked(!m_CustomizeDomain.isChecked());
+                event->accept();
+                return;
+            }
+        }
+        else if (m_btnStartQuickOn.isVisible())
+        {
+            QRect geometry = m_btnStartQuickOn.geometry();
+            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
+            if (geometry.contains(pt))
+            {
+                emit SetupQuickOnSettingStatus();
+                event->accept();
+                return;
+            }
+        }
         m_Drag = true;
         m_DragPosition = event->globalPos() - this->pos();
         event->accept();
@@ -932,6 +973,3 @@ void MainWindow::mouseReleaseEvent(QMouseEvent *event)
 
       m_Drag=false;
 }
-
-
-

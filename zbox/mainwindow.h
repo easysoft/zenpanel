@@ -27,6 +27,7 @@
 #include "httprequest/zhttprequest.h"
 
 #include <QCheckBox>
+#include <QTimer>
 
 #include <string>
 #include <memory>
@@ -130,6 +131,8 @@ private:
     QLabel m_Pass;
     QLineEdit m_UsrPass;
 
+    QTimer m_InitMoveTimer;
+
     ZHttpRequest m_HttpReq;
     std::string m_Domain;
     int m_HttpPort, m_HttpsPort;
@@ -210,6 +213,8 @@ private slots:
     void OnSetupQuickOnSettingStatus();
     void OnSetupQuickOnCurrentStatus(int stat);
     void OnSetupQuickOnStartStatus();
+    void OnCustomizeDomain(int state);
+    void OnInitMoveWindow();
 };
 
 #endif // MAINWINDOW_H
