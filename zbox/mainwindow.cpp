@@ -463,8 +463,8 @@ void MainWindow::adjustAfterLangImpl()
 
     m_StopQuickOn.setText(tlng("quickon.stop"));
     m_VisitQuickOnPage.setText(tlng("quickon.visit"));
-    m_Usr.setText(tlng("quickon.usr"));
-    m_Pass.setText(tlng("quickon.pass"));
+    m_Usr.setText(tlng("quickon.usr") + u8":");
+    m_Pass.setText(tlng("quickon.pass") + u8":");
         
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
@@ -715,6 +715,12 @@ void MainWindow::createMainUI()
 
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
+
+    m_SettingWidget.setProperty("forUse","QuickOn");
+    m_SettingSave.setProperty("forUse","installBtn");
+    m_btnStartQuickOn.setProperty("forUse","installBtn");
+    m_StopQuickOn.setProperty("forUse","installBtn");
+    m_VisitQuickOnPage.setProperty("forUse","installBtn");
 
     m_QuickOnLayer.addWidget(&m_btnStartQuickOn, 0, Qt::AlignHCenter);
     m_QuickOnLayer.addWidget(&m_SettingWidget);
