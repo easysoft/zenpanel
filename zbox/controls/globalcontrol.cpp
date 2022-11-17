@@ -133,8 +133,6 @@ void GlobalControl::createNotInstallUI()
 //    m_btnStartQuickOn.setProperty("forUse","installBtn");
 
     m_mainLayer.addWidget(&m_btnStartQuickOn);
-
-    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SLOT(sendOneSetup()));
 }
 
 void GlobalControl::createInstallingUI()

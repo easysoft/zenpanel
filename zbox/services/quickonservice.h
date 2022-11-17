@@ -36,6 +36,8 @@ public:
     QuickOnService(Controller *controllor, Yaml2Stream *config, QString type);
     virtual ~QuickOnService();
 
+    bool IsLocalConfigExist();
+
     bool QueryUrl(std::shared_ptr<std::string> domain, std::string& message);
     bool SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record);
 

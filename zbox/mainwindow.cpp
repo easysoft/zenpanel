@@ -131,6 +131,12 @@ QScreen* MainWindow::getScreen()
     return QGuiApplication::screens().at(number);
 }
 
+QuickOnService* MainWindow::GetQuickOnService()
+{
+    auto service = m_ctr->queryServiceList(true, true);
+    return dynamic_cast<QuickOnService*>(*service.begin());
+}
+
 void MainWindow::resized()
 {
     m_ctr->computeScale();
@@ -226,12 +232,57 @@ void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
     }
 }
 
+void MainWindow::OnSignUrl()
+{
+    emit SetupQuickOnCurrentStatus(ST_REQDOMAIN);
+    auto quickon = GetQuickOnService();
+    std::shared_ptr<std::string> domain(new std::string);
+    std::string message;
+    if (!quickon->QueryUrl(domain, message))
+    {
+        m_CurrentStatus.setText(message.c_str());
+        return;
+    }
+
+    emit CheckHardWare();
+}
+
+void MainWindow::OnCheckHardWare()
+{
+    emit SetupQuickOnCurrentStatus(ST_CHECKHARDWARE);
+    emit SetupQuickOnCurrentStatus(ST_CHECKSERVICE);
+}
+
+void MainWindow::OnInstallQuickOnService()
+{
+    auto quickon = GetQuickOnService();
+    emit SetupQuickOnCurrentStatus(ST_STARTSERVICE);
+}
+
+void MainWindow::OnStartQuickOnService()
+{
+}
+
 void MainWindow::OnSetupQuickOnStartStatus()
 {
     m_btnStartQuickOn.setVisible(false);
     m_SettingWidget.setVisible(false);
     m_CurrentStatus.setVisible(false);
     m_StartWidget.setVisible(true);
+}
+
+void MainWindow::OnButtonStartQuickOn()
+{
+    L_DEBUG("############# {0} @ {1}", __FUNCTION__, __LINE__);
+    auto quickon = GetQuickOnService();
+    if (quickon->IsLocalConfigExist())
+    {
+        L_DEBUG("emit SetupQuickOnStartStatus()");
+        emit SetupQuickOnStartStatus();
+        return;
+    }
+
+    emit SetupQuickOnSettingStatus();
 }
 
 void MainWindow::OnCustomizeDomain(int state)
@@ -454,9 +505,8 @@ void MainWindow::adjustAfterLangImpl()
     m_btnStartQuickOn.setText(tlng("quickon.start"));
     m_SettingTitle.setText(tlng("quickon.title"));
     m_Dot.setText(tlng("quickon.dot"));
-    auto domain = tlng("quickon.domain");
-    QStringListModel* domain_list = new QStringListModel;
-    domain_list->setStringList(domain.split(","));
+    QString domain = tlng("quickon.domain");
+    QStringListModel* domain_list = new QStringListModel(domain.split(","));
     m_Domain1.setModel(domain_list);
     m_CustomizeDomain.setText(tlng("quickon.customize"));
     m_SettingSave.setText(tlng("quickon.save"));
@@ -465,7 +515,7 @@ void MainWindow::adjustAfterLangImpl()
     m_VisitQuickOnPage.setText(tlng("quickon.visit"));
     m_Usr.setText(tlng("quickon.usr") + u8":");
     m_Pass.setText(tlng("quickon.pass") + u8":");
-        
+
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
 }
@@ -706,7 +756,8 @@ void MainWindow::createMainUI()
 //    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
 
     connect(this, SIGNAL(SetupQuickOnInitStatus()), this, SLOT(OnSetupQuickOnInitStatus()));
-    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnSettingStatus()));
+    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(StartQuickOnButtonsClicked()));
+    connect(this, SIGNAL(StartQuickOnButtonsClicked()), this, SLOT(OnButtonStartQuickOn()));
     connect(this, SIGNAL(SetupQuickOnSettingStatus()), this, SLOT(OnSetupQuickOnSettingStatus()));
     connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnStartStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
@@ -946,7 +997,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
             QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
             if (geometry.contains(pt))
             {
-                emit SetupQuickOnSettingStatus();
+                emit StartQuickOnButtonsClicked();
                 event->accept();
                 return;
             }

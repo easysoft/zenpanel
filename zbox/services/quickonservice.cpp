@@ -86,6 +86,12 @@ QuickOnService::~QuickOnService()
         CloseServiceHandle(m_hScHandle);
 }
 
+bool QuickOnService::IsLocalConfigExist()
+{
+    std::shared_ptr<std::string> domain(new std::string);
+    return QueryUrlLocal(domain);
+}
+
 bool QuickOnService::QueryUrl(std::shared_ptr<std::string> domain, std::string& message)
 {
     if (QueryUrlLocal(domain))
@@ -651,6 +657,7 @@ bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
     */
     char local_file_name[MAX_PATH] = { 0 };
     sprintf(local_file_name, "%s\\init\\env", g_szVirtualBoxHome);
+    L_TRACE("{0} @ {1}: {2}", __FUNCTION__, __LINE__, local_file_name);
     FILE* fp = fopen(local_file_name, "rt");
     if (!fp)
     {
@@ -676,6 +683,7 @@ bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
     }
     fclose(fp);
 
+    L_TRACE("----- domain = {0}", domain->c_str());
     return !domain->empty();
 }
 

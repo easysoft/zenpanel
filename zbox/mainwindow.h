@@ -174,6 +174,7 @@ private:
     void mouseReleaseEvent(QMouseEvent *event);
 
     QScreen* getScreen();
+    QuickOnService* GetQuickOnService();
 protected:
     void closeEvent(QCloseEvent *event);
     void paintEvent(QPaintEvent *event);
@@ -181,9 +182,15 @@ protected:
 signals:
     void togglelog();
     void SetupQuickOnInitStatus();
+    void StartQuickOnButtonsClicked();
     void SetupQuickOnSettingStatus();
     void SetupQuickOnCurrentStatus(int stat);
     void SetupQuickOnStartStatus();
+
+    void SignUrl();
+    void CheckHardWare();
+    void InstallQuickOnService();
+    void StartQuickOnService();
     
 private slots:
     void toggleLog();
@@ -211,8 +218,13 @@ private slots:
 
     void OnSetupQuickOnInitStatus();
     void OnSetupQuickOnSettingStatus();
+    void OnSignUrl();
+    void OnCheckHardWare();
+    void OnInstallQuickOnService();
+    void OnStartQuickOnService();
     void OnSetupQuickOnCurrentStatus(int stat);
     void OnSetupQuickOnStartStatus();
+    void OnButtonStartQuickOn();
     void OnCustomizeDomain(int state);
     void OnInitMoveWindow();
 };
