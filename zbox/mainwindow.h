@@ -109,7 +109,7 @@ private:
     QLabel m_Dot;
     QComboBox m_Domain1;
 
-    QCheckBox m_CustomizeDomain;
+//    QCheckBox m_CustomizeDomain;
 
     QLabel m_ValidDomain;
     QPushButton m_SettingSave;

@@ -63,7 +63,9 @@ quickon:
   stop: 停止渠成服务
   visit: 访问管理后台
   usr: 默认用户名
+  defaultusr: qadmin
   pass: 默认密码
+  defaultpass: pass4Quickon
 
 # 托盘
 tray:

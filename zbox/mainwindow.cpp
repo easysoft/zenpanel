@@ -508,13 +508,15 @@ void MainWindow::adjustAfterLangImpl()
     QString domain = tlng("quickon.domain");
     QStringListModel* domain_list = new QStringListModel(domain.split(","));
     m_Domain1.setModel(domain_list);
-    m_CustomizeDomain.setText(tlng("quickon.customize"));
+//    m_CustomizeDomain.setText(tlng("quickon.customize"));
     m_SettingSave.setText(tlng("quickon.save"));
 
     m_StopQuickOn.setText(tlng("quickon.stop"));
     m_VisitQuickOnPage.setText(tlng("quickon.visit"));
     m_Usr.setText(tlng("quickon.usr") + u8":");
+    m_UsrName.setText(tlng("quickon.defaultusr"));
     m_Pass.setText(tlng("quickon.pass") + u8":");
+    m_UsrPass.setText(tlng("quickon.defaultpass"));
 
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
@@ -762,35 +764,58 @@ void MainWindow::createMainUI()
     connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnStartStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
     connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
-    connect(&m_CustomizeDomain, SIGNAL(stateChanged(int)), this, SLOT(OnCustomizeDomain(int)));
+//    connect(&m_CustomizeDomain, SIGNAL(stateChanged(int)), this, SLOT(OnCustomizeDomain(int)));
 
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
+    m_QuickOnLayer.setSpacing(0);
+    m_QuickOnLayer.setContentsMargins(0,0,0,0);
 
     m_SettingWidget.setProperty("forUse","QuickOn");
-    m_SettingSave.setProperty("forUse","installBtn");
-    m_btnStartQuickOn.setProperty("forUse","installBtn");
+    m_SettingSave.setProperty("forUse","saveBtn");
+    m_btnStartQuickOn.setProperty("forUse","uninstallBtn");
     m_StopQuickOn.setProperty("forUse","installBtn");
     m_VisitQuickOnPage.setProperty("forUse","installBtn");
+    m_Domain0.setProperty("forUse", "inputEdit");
+    m_Dot.setObjectName("dot");
+    m_Usr.setProperty("forUse", "tip");
+    m_UsrName.setProperty("forUse", "tipEdit");
+    m_Pass.setProperty("forUse", "tip");
+    m_UsrPass.setProperty("forUse", "tipEdit");
+    m_SettingTitle.setObjectName("QuickOnTitle");
+
+    m_Dot.setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    m_UsrName.setEnabled(false);
+    m_UsrPass.setEnabled(false);
 
     m_QuickOnLayer.addWidget(&m_btnStartQuickOn, 0, Qt::AlignHCenter);
     m_QuickOnLayer.addWidget(&m_SettingWidget);
     m_SettingWidget.setLayout(&m_SettingLayout);
     m_SettingLayout.addWidget(&m_SettingTitle, 0, Qt::AlignHCenter);
     m_SettingLayout.addLayout(&m_DomainLayer);
+    m_SettingLayout.setSpacing(0);
+    m_DomainLayer.setSpacing(0);
     m_DomainLayer.addWidget(&m_Domain0);
     m_DomainLayer.addWidget(&m_Dot);
     m_DomainLayer.addWidget(&m_Domain1);
-    m_SettingLayout.addWidget(&m_CustomizeDomain, 0, Qt::AlignHCenter);
+//    m_SettingLayout.addWidget(&m_CustomizeDomain, 0, Qt::AlignHCenter);
     m_SettingLayout.addWidget(&m_ValidDomain, 0, Qt::AlignHCenter);
-    m_SettingLayout.addWidget(&m_SettingSave);
+    m_SettingLayout.addWidget(&m_SettingSave, 0, Qt::AlignHCenter);
     m_QuickOnLayer.addWidget(&m_CurrentStatus);
     m_QuickOnLayer.addWidget(&m_StartWidget);
     m_StartWidget.setLayout(&m_StartLayer);
+    m_StartLayer.setSpacing(0);
+//    m_StartLayer.setContentsMargins(0,0,0,0);
+    m_StartLayer.addSpacing(30);
     m_StartLayer.addLayout(&m_StartButtonsLayer);
     m_StartButtonsLayer.addWidget(&m_StopQuickOn);
+    m_StartButtonsLayer.addSpacing(15);
     m_StartButtonsLayer.addWidget(&m_VisitQuickOnPage);
+    m_StartLayer.addSpacing(-30);
     m_StartLayer.addLayout(&m_UserLayer);
+    
+    m_UserLayer.setSpacing(0);
+    m_UserLayer.setContentsMargins(8,0,0,0);
     m_UserLayer.addWidget(&m_Usr);
     m_UserLayer.addWidget(&m_UsrName);
     m_UserLayer.addWidget(&m_Pass);
@@ -980,18 +1005,20 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        if (m_CustomizeDomain.isVisible())
-        {
-            QRect geometry = m_CustomizeDomain.geometry();
-            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
-            if (geometry.contains(pt))
-            {
-                m_CustomizeDomain.setChecked(!m_CustomizeDomain.isChecked());
-                event->accept();
-                return;
-            }
-        }
-        else if (m_btnStartQuickOn.isVisible())
+
+//        if (m_CustomizeDomain.isVisible())
+//        {
+//            QRect geometry = m_CustomizeDomain.geometry();
+//            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
+//            if (geometry.contains(pt))
+//            {
+//                m_CustomizeDomain.setChecked(!m_CustomizeDomain.isChecked());
+//                event->accept();
+//                return;
+//            }
+//        }
+//        else 
+        if (m_btnStartQuickOn.isVisible())
         {
             QRect geometry = m_btnStartQuickOn.geometry();
             QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
