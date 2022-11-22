@@ -80,22 +80,12 @@ private:
     ZPopupMenu *m_menuWidget;
     QLabel *m_menuIcon;
 
-    ZPopupButton *m_viewServiceBtn;
-    ZPopupButton *m_sysBackupBtn;
-    ZPopupButton *m_languageBtn;
-    ZPopupButton *m_viewHelpBtn;
-    ZPopupButton *m_checkUpdateBtn;
-    ZPopupButton *m_switchThemeBtn;
-    ZPopupButton *m_removeServiceBtn;
-
-    ZPopupButton *m_langZhCnAction;
-    ZPopupButton *m_langZhTwAction;
-    ZPopupButton *m_langENAction;
-
-    ZPopupButton *m_themeBlueAction;
-    ZPopupButton *m_themeWhiteAction;
-    ZPopupButton *m_themeBlackAction;
-
+    ZPopupButton* m_StartSvrBtn;
+    ZPopupButton* m_StopSvrBtn;
+    ZPopupButton* m_InstallSvrBtn;
+    ZPopupButton* m_UninstallSvrBtn;
+    ZPopupButton* m_ReisntallSvrBtn;
+    
     QVBoxLayout m_QuickOnLayer;
     QWidget m_QuickOnWidget;
     // NO.1，启动渠成软件百宝箱
@@ -213,7 +203,10 @@ private slots:
     void onClickUpdateHelp();
 
     void OneClickSetup();
+    void oneClickStart();
+    void onClickInstall();
     void oneClickStop();
+    void onClickReisntall();
 
     void clickVisit();
 

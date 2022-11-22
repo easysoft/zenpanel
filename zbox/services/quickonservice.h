@@ -43,15 +43,15 @@ public:
 
     bool IsLocalConfigExist();
 
-    void QueryUrl(std::function<void(bool, const std::string&)> cb);
-    bool SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record);
+    void QueryUrl(const std::string& domain, const std::string& sub, std::function<void(bool, const std::string&)> cb);
+    void SignUrl();
 
     void QueryPortRnd(int& http_port, int& https_port);
     void SaveInitEnv(std::shared_ptr<std::string> domain, int http_port, int https_port);
+    int IsInstalled();
 
     static void PrepareCMD();
     static int ExecCmd(char read_buffer[], Service *service, SendProxy *proxy, const char* fmt, ...);
-
 //    virtual QString queryState() override;
 
 signals:
@@ -71,7 +71,6 @@ protected:
     virtual bool lazyInstallServiceImpl(SendProxy *proxy) override;
 
 private:
-    int IsInstalled();
     int RunVirtualBoxMSI(char* buf);
     int IsOvaExist(char* buf);
     int ImportOVA(char* buf);
@@ -79,13 +78,13 @@ private:
 
     void VBoxManageFullPath();
 
-    bool QueryUrlLocal(std::string& domain);
-    bool QueryUrlNet(std::function<void(bool, const std::string&)> cb);
+    bool QueryUrlLocal();
+    bool QueryUrlNet(const std::string& domain, const std::string& sub, std::function<void(bool, const std::string&)> cb);
     void QueryPortLocal(int& http_port, int& https_port);
 
 private:
     bool m_bIsExist;
-
+    std::string m_Domain;
     SC_HANDLE m_hScHandle, m_hScHandleVbox;
 }; // VBoxService
 

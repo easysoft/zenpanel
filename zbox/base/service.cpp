@@ -240,7 +240,7 @@ bool Service::installServiceImpl(SendProxy *proxy)
     QString selfServiceState = this->queryState();
     if(selfServiceState != ConstUtil::U_SERVICE_UNKNOWN)
     {
-        L_ERROR("{0} : {1}", __FUNCTION__, selfServiceState.toStdString().c_str());
+        L_ERROR("############ {0} : {1}", __FUNCTION__, selfServiceState.toStdString().c_str());
         return false;
     }
 
@@ -401,6 +401,7 @@ bool Service::startServiceImpl(SendProxy *proxy)
     QString serviceState = this->state();
     if(serviceState != ConstUtil::U_SERVICE_STOPPED)
     {
+        L_ERROR("----------->>>>> {0} @ {1} FAILED", __FUNCTION__, __LINE__);
         return false;
     }
 
@@ -410,7 +411,6 @@ bool Service::startServiceImpl(SendProxy *proxy)
     sleepBetween();
 
     QString newServiceState = this->queryState();
-
     if(newServiceState == ConstUtil::U_SERVICE_RUNNING)
     {
         proxy->toSend(getSuccessMsg("message.startSuccess",this->title(),this->port()));

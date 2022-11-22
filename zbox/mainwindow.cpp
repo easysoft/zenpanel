@@ -239,7 +239,10 @@ void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
         InstallQuickOnService();
 
         if (m_ConfigQuickOnFailed)
+        {
+            m_CurrentStatus.setText(u8"系统服务安装失败");
             break;
+        }
         
         emit SetupQuickOnCurrentStatus(ST_STARTSERVICE);
     }
@@ -282,10 +285,14 @@ void MainWindow::SignUrl()
         }
 
         m_ConfigQuickOnFailed = false;
+        m_Domain = message;
 
         emit SetupQuickOnCurrentStatus(ST_CHECKHARDWARE);
     };
-    quickon->QueryUrl(cb);
+
+    std::string usr_sub = m_Domain0.text().toStdString();
+    std::string usr_domain = m_Domain1.currentText().toStdString();
+    quickon->QueryUrl(usr_domain, usr_sub, cb);
 }
 
 void MainWindow::CheckHardWare()
@@ -297,13 +304,18 @@ void MainWindow::CheckHardWare()
 void MainWindow::InstallQuickOnService()
 {
     L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
-    m_ctr->oneSetup();
+    auto quickon = GetQuickOnService();
+    SendProxy proxy;
+    quickon->installService(&proxy);
+    m_ConfigQuickOnFailed = quickon->IsInstalled() != 0;
 }
 
 void MainWindow::StartQuickOnService()
 {
     L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
-    m_ctr->reStart();
+    auto quickon = GetQuickOnService();
+    SendProxy proxy;
+    quickon->startService(&proxy);
 }
 
 void MainWindow::OnSetupQuickOnStartStatus()
@@ -521,42 +533,11 @@ void MainWindow::adjustAfterLangImpl()
     this->setWindowTitle(m_lblFootor->text());
 
     //main menu
-    m_viewServiceBtn->setText(tlng("menu.viewService"));
-    m_removeServiceBtn->setText(tlng("menu.removeService"));
-    m_sysBackupBtn->setText(tlng("menu.sysBackup"));
-    m_languageBtn->setText(tlng("menu.Language"));
-    m_viewHelpBtn->setText(tlng("menu.viewHelp"));
-    m_checkUpdateBtn->setText(tlng("menu.checkUpdate"));
-    m_switchThemeBtn->setText(tlng("menu.switchTheme"));
-
-    m_langZhCnAction->setText(tlng("menu.langZhCn"));
-    m_langZhTwAction->setText(tlng("menu.langZhTw"));
-    m_langENAction->setText(tlng("menu.langEN"));
-
-    m_themeBlueAction->setText(tlng("theme.blue"));
-    m_themeWhiteAction->setText(tlng("theme.green"));
-    m_themeBlackAction->setText(tlng("theme.pink"));
-
-    //============
-    m_viewServiceBtn->adjustSize();
-    m_removeServiceBtn->adjustSize();
-    m_sysBackupBtn->adjustSize();
-    m_languageBtn->adjustSize();
-    m_viewHelpBtn->adjustSize();
-    m_checkUpdateBtn->adjustSize();
-    m_switchThemeBtn->adjustSize();
-
-    m_langZhCnAction->adjustSize();
-    m_langZhTwAction->adjustSize();
-    m_langENAction->adjustSize();
-
-    m_themeBlueAction->adjustSize();
-    m_themeWhiteAction->adjustSize();
-    m_themeBlackAction->adjustSize();
-
-    m_languageBtn->adjustAfterLang();
-    m_switchThemeBtn->adjustAfterLang();
-
+    m_StartSvrBtn->setText(tlng("menu.StartService"));
+    m_StopSvrBtn->setText(tlng("menu.StopService"));
+    m_InstallSvrBtn->setText(tlng("menu.IntallService"));
+    m_UninstallSvrBtn->setText(tlng("menu.UninstallService"));
+    m_ReisntallSvrBtn->setText(tlng("menu.ReInstallService"));
     m_menuWidget->adjustAfterLang();
 
     // QuickOn
@@ -674,79 +655,25 @@ void MainWindow::createSetingMenu(QPushButton *btn)
     m_menuIcon->setPixmap(themePixmap);
 
     //main function button
-    m_removeServiceBtn = new ZPopupButton(m_menuWidget);
-    m_viewServiceBtn = new ZPopupButton(m_menuWidget);
-    m_sysBackupBtn = new ZPopupButton(m_menuWidget);
-    m_languageBtn = new ZPopupButton(m_menuWidget);
-    m_viewHelpBtn = new ZPopupButton(m_menuWidget);
-    m_checkUpdateBtn = new ZPopupButton(m_menuWidget);
-    m_switchThemeBtn = new ZPopupButton(m_menuWidget);
+    m_StartSvrBtn = new ZPopupButton(m_menuWidget);
+    m_StopSvrBtn = new ZPopupButton(m_menuWidget);
+    m_InstallSvrBtn = new ZPopupButton(m_menuWidget);
+    m_UninstallSvrBtn = new ZPopupButton(m_menuWidget);
+    m_ReisntallSvrBtn = new ZPopupButton(m_menuWidget);
 
-    m_menuWidget->add(m_removeServiceBtn);
-    m_menuWidget->add(m_viewServiceBtn);
+    m_menuWidget->add(m_StartSvrBtn);
+    m_menuWidget->add(m_StopSvrBtn);
+    m_menuWidget->add(m_InstallSvrBtn);
+    m_menuWidget->add(m_UninstallSvrBtn);
+    m_menuWidget->add(m_ReisntallSvrBtn);
 
-    if(m_ctr->enableBackup())
-        m_menuWidget->add(m_sysBackupBtn);
+    connect(m_StartSvrBtn,SIGNAL(clicked()),this,SLOT(oneClickStart()));
+    connect(m_StopSvrBtn,SIGNAL(clicked()),this,SLOT(oneClickStop()));
 
-    m_menuWidget->add(m_languageBtn);
-    m_menuWidget->add(m_viewHelpBtn);
-    m_menuWidget->add(m_checkUpdateBtn);
-    m_menuWidget->add(m_switchThemeBtn);
+    connect(m_InstallSvrBtn,SIGNAL(clicked()),this,SLOT(onClickInstall()));
+    connect(m_UninstallSvrBtn,SIGNAL(clicked()),this,SLOT(onClickUninstall()));
 
-    //language function button
-    ZPopupMenu *langMenu = new ZPopupMenu(this);
-    //langMenu->setProperty("forUse","customMenu");
-
-    m_langZhCnAction = new ZPopupButton(langMenu);
-    m_langZhTwAction = new ZPopupButton(langMenu);
-    m_langENAction = new ZPopupButton(langMenu);
-
-    m_langZhCnAction->setObjectName("zh-cn");
-    m_langZhTwAction->setObjectName("zh-tw");
-    m_langENAction->setObjectName("en");
-
-
-    langMenu->add(m_langZhCnAction);
-    langMenu->add(m_langZhTwAction);
-    langMenu->add(m_langENAction);
-
-    langMenu->adjustSize();
-
-    //theme function button
-    ZPopupMenu *themeMenu = new ZPopupMenu(this);
-    //themeMenu->setProperty("forUse","customMenu");
-
-    m_themeBlueAction = new ZPopupButton(themeMenu);
-    m_themeWhiteAction = new ZPopupButton(themeMenu);
-    m_themeBlackAction = new ZPopupButton(themeMenu);
-
-    m_themeBlueAction->setObjectName("blue");
-    m_themeWhiteAction->setObjectName("green");
-    m_themeBlackAction->setObjectName("pink");
-
-    themeMenu->add(m_themeBlueAction);
-    themeMenu->add(m_themeWhiteAction);
-    themeMenu->add(m_themeBlackAction);
-
-    themeMenu->adjustSize();
-
-    m_languageBtn->setPopup(langMenu);
-    m_switchThemeBtn->setPopup(themeMenu);
-
-    connect(m_viewServiceBtn,SIGNAL(clicked()),this,SLOT(onClickViewService()));
-    connect(m_removeServiceBtn,SIGNAL(clicked()),this,SLOT(onClickUninstall()));
-    connect(m_sysBackupBtn,SIGNAL(clicked()),this,SLOT(onClickBackup()));
-
-    connect(m_langZhCnAction,SIGNAL(clicked()),this,SLOT(onLangChanged()));
-    connect(m_langZhTwAction,SIGNAL(clicked()),this,SLOT(onLangChanged()));
-    connect(m_langENAction,SIGNAL(clicked()),this,SLOT(onLangChanged()));
-
-    connect(m_viewHelpBtn,SIGNAL(clicked()),this,SLOT(onClickViewHelp()));
-    connect(m_checkUpdateBtn,SIGNAL(clicked()),this,SLOT(onClickUpdateHelp()));
-
-    connect(m_themeBlueAction,SIGNAL(clicked()),this,SLOT(onThemeChanged()));
-    connect(m_themeWhiteAction,SIGNAL(clicked()),this,SLOT(onThemeChanged()));
-    connect(m_themeBlackAction,SIGNAL(clicked()),this,SLOT(onThemeChanged()));
+    connect(m_ReisntallSvrBtn,SIGNAL(clicked()),this,SLOT(onClickReisntall()));
 
     m_menuIcon->setVisible(false);
     m_menuWidget->setVisible(false);
@@ -769,34 +696,6 @@ void MainWindow::showMenu()
 
     m_menuIcon->setVisible(true);
     m_menuWidget->setVisible(true);
-
-    QList<ZPopupButton*> themeList;
-    themeList.append(m_themeBlueAction);
-    themeList.append(m_themeBlackAction);
-    themeList.append(m_themeWhiteAction);
-
-    foreach(ZPopupButton* btn,themeList)
-    {
-        btn->setCheck(false);
-        if(btn->objectName() == m_ctr->themeName())
-        {
-            btn->setCheck(true);
-        }
-    }
-
-    QList<ZPopupButton*> lngList;
-    lngList.append(m_langENAction);
-    lngList.append(m_langZhCnAction);
-    lngList.append(m_langZhTwAction);
-
-    foreach(ZPopupButton* btn,lngList)
-    {
-        btn->setCheck(false);
-        if(btn->objectName() == m_ctr->langName())
-        {
-            btn->setCheck(true);
-        }
-    }
 }
 
 void MainWindow::createMainUI()
@@ -986,9 +885,29 @@ void MainWindow::OneClickSetup()
     m_ctr->oneSetup();
 }
 
+void MainWindow::oneClickStart()
+{
+    StartQuickOnService();
+    emit SetupQuickOnStartStatus();
+}
+
 void MainWindow::oneClickStop()
 {
     m_ctr->oneStop();
+    emit SetupQuickOnInitStatus();
+}
+
+void MainWindow::onClickReisntall()
+{
+    auto quickon = GetQuickOnService();
+    SendProxy proxy;
+    quickon->uninstallService(&proxy);
+    InstallQuickOnService();
+}
+
+void MainWindow::onClickInstall()
+{
+    InstallQuickOnService();
 }
 
 void MainWindow::onClickUninstall()
@@ -997,6 +916,7 @@ void MainWindow::onClickUninstall()
 //    m_menuWidget->setVisible(false);
 
     m_ctr->oneUninstall();
+    emit SetupQuickOnInitStatus();
 }
 
 void MainWindow::onClickBackup()
@@ -1026,6 +946,7 @@ void MainWindow::onClickUpdateHelp()
 
 void MainWindow::clickVisit()
 {
+    L_TRACE("<<<<<< {0} @ {1} - {2}:{3}", __FUNCTION__, __LINE__, m_Domain.c_str(), m_HttpPort);
     if (m_Domain.empty() || !m_HttpsPort)
         return;
 

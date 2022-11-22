@@ -79,6 +79,7 @@ QString ProcessUtil::serviceState(QString serviceName)
             status = ConstUtil::U_SERVICE_UNKNOWN;
     }
 
+    L_TRACE("===>>> {0} @ {1} STATUS: {2}", __FUNCTION__, __LINE__, status.toStdString().c_str());
     return status;
 }
 

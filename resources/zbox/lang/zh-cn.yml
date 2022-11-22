@@ -50,6 +50,7 @@ window:
 # 渠成
 quickon:
   start: 启动渠成软件百宝箱
+  retry: 重试
   title: 请设置域名
   dot: .
   domain: crop.cc,haogs.cn
@@ -166,24 +167,9 @@ theme:
   pink: 粉色
 
 menu:
-  viewService: 查看服务
-  removeService: 卸载服务
-  sysBackup: 系统备份
-  language: language
-  viewHelp: 查看帮助
-  checkUpdate: 检查更新
-  switchTheme: 切换主题
-
-  langZhCn: 简体中文
-  langZhTw: 繁體中文
-  langEN: English
-
-  visit: 访问
-  viewLog: 查看日志
-  modifyPort: 修改端口
-  modifyUser: 修改密码
-  install: 安装服务
-  stopService: 停止服务
-  startService: 启动服务
-  reinstall: 重新安装
-  uninstall: 卸载服务
+  StartService: 启动服务
+  StopService: 停止服务
+  IntallService: 安装服务
+  UninstallService: 卸载服务
+  ReStartService: 重启服务
+  ReInstallService: 重新安装
