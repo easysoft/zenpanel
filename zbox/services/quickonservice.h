@@ -28,6 +28,9 @@ struct quickon_record
 
     std::string message;
 };
+
+typedef void (*PostDataCallback)(const std::string&);
+
 class Controller;
 class QuickOnService : public QObject, public Service
 {
@@ -36,9 +39,11 @@ public:
     QuickOnService(Controller *controllor, Yaml2Stream *config, QString type);
     virtual ~QuickOnService();
 
+    void ReBindHttpPost(const std::function<void(std::shared_ptr<std::string>, std::shared_ptr<std::string>)>& cb);
+
     bool IsLocalConfigExist();
 
-    bool QueryUrl(std::shared_ptr<std::string> domain, std::string& message);
+    void QueryUrl(std::function<void(bool, const std::string&)> cb);
     bool SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record);
 
     void QueryPortRnd(int& http_port, int& https_port);
@@ -50,7 +55,7 @@ public:
 //    virtual QString queryState() override;
 
 signals:
-    void HttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
+    void HttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data);
     void NotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port);
     
 public:
@@ -74,8 +79,8 @@ private:
 
     void VBoxManageFullPath();
 
-    bool QueryUrlLocal(std::shared_ptr<std::string> domain);
-    bool QueryUrlNet(std::shared_ptr<std::string> domain, std::string& message);
+    bool QueryUrlLocal(std::string& domain);
+    bool QueryUrlNet(std::function<void(bool, const std::string&)> cb);
     void QueryPortLocal(int& http_port, int& https_port);
 
 private:

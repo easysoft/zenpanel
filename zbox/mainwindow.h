@@ -44,6 +44,7 @@ class MainWindow : public QMainWindow,GScale,GLang
         ST_CHECKHARDWARE,
         ST_CHECKSERVICE,
         ST_STARTSERVICE,
+        ST_DONE,
     };
 
 public:
@@ -53,6 +54,7 @@ public:
     void appendMsg(MsgResult msg);
     void onAppStateChanged();
     void onServiceStateChanged(QString typeAndState);
+    std::string OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data);
 
 private:
     TrayManager *m_trayMgr;
@@ -116,6 +118,7 @@ private:
 
     // NO.3, 当前状态显示
     QLabel m_CurrentStatus;
+    QPushButton m_RetryButton;
 
     // NO.4，成功启动界面
     QWidget m_StartWidget;
@@ -130,6 +133,8 @@ private:
     QLineEdit m_UsrName;
     QLabel m_Pass;
     QLineEdit m_UsrPass;
+    bool m_ConfigQuickOnFailed;
+    int m_LastStat;
 
     QTimer m_InitMoveTimer;
 
@@ -175,6 +180,10 @@ private:
 
     QScreen* getScreen();
     QuickOnService* GetQuickOnService();
+    void SignUrl();
+    void CheckHardWare();
+    void InstallQuickOnService();
+    void StartQuickOnService();
 protected:
     void closeEvent(QCloseEvent *event);
     void paintEvent(QPaintEvent *event);
@@ -186,11 +195,10 @@ signals:
     void SetupQuickOnSettingStatus();
     void SetupQuickOnCurrentStatus(int stat);
     void SetupQuickOnStartStatus();
-
-    void SignUrl();
-    void CheckHardWare();
-    void InstallQuickOnService();
-    void StartQuickOnService();
+    void SaveQuickOnConfig();
+    void RetryConfig();
+    void StopQuickOn();
+    void VisitQuickOn();
     
 private slots:
     void toggleLog();
@@ -213,20 +221,17 @@ private slots:
 
     void resized();
 
-    void OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply);
     void OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port);
 
     void OnSetupQuickOnInitStatus();
     void OnSetupQuickOnSettingStatus();
-    void OnSignUrl();
-    void OnCheckHardWare();
-    void OnInstallQuickOnService();
-    void OnStartQuickOnService();
     void OnSetupQuickOnCurrentStatus(int stat);
     void OnSetupQuickOnStartStatus();
     void OnButtonStartQuickOn();
     void OnCustomizeDomain(int state);
     void OnInitMoveWindow();
+    void OnSaveQuickOnConfig();
+    void OnRetryConfig();
 };
 
 #endif // MAINWINDOW_H

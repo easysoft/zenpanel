@@ -49,6 +49,7 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     , m_ValidDomain()
     , m_SettingSave()
     , m_CurrentStatus()
+    , m_RetryButton()
     , m_StopQuickOn()
     , m_VisitQuickOnPage()
     , m_Usr()
@@ -57,6 +58,8 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     , m_UsrPass()
     , m_InitMoveTimer(this)
     , m_HttpReq(this)
+    , m_ConfigQuickOnFailed(false)
+    , m_LastStat(ST_REQDOMAIN)
 {
     m_showLog = true;
 
@@ -157,23 +160,26 @@ void MainWindow::resized()
     L_DEBUG("===================================== {0}, {1}", width(), height());
 }
 
-void MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data, std::shared_ptr<std::string> reply)
+std::string MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::shared_ptr<std::string> data)
 {
     L_TRACE("############### url = {0}, data =[[[{1}]]]", url->c_str(), data->c_str());
     m_HttpReq.SetUrl(url->c_str());
     m_HttpReq.SetPost(data->c_str());
 
-    if (!m_HttpReq.Exec(*reply))
+    std::string reply;
+    if (!m_HttpReq.Exec(reply))
     {
         L_ERROR("!!!!!!!!!! HTTP Exec FAILED");
-        return;
+        return reply;
     }
 
     L_TRACE("@@@@@@@@@@@ HTTP Exec SUCCESS");
+    return reply;
 }
 
 void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, int http_port, int https_port)
 {
+    L_TRACE("===============================================================");
     m_Domain = *domain;
     m_HttpPort = http_port;
     m_HttpsPort = https_port;
@@ -187,6 +193,7 @@ void MainWindow::OnSetupQuickOnInitStatus()
     m_btnStartQuickOn.setVisible(true);
     m_SettingWidget.setVisible(false);
     m_CurrentStatus.setVisible(false);
+    m_RetryButton.setVisible(false);
     m_StartWidget.setVisible(false);
 }
 
@@ -195,6 +202,7 @@ void MainWindow::OnSetupQuickOnSettingStatus()
     m_btnStartQuickOn.setVisible(false);
     m_SettingWidget.setVisible(true);
     m_CurrentStatus.setVisible(false);
+    m_RetryButton.setVisible(false);
     m_StartWidget.setVisible(false);
 }
 
@@ -203,64 +211,99 @@ void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
     m_btnStartQuickOn.setVisible(false);
     m_SettingWidget.setVisible(false);
     m_CurrentStatus.setVisible(true);
+    m_RetryButton.setVisible(false);
     m_StartWidget.setVisible(false);
 
+    m_LastStat = stat;
+    m_RetryButton.setEnabled(false);
+    L_TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! {0} @ {1} => {2}", __FUNCTION__, __LINE__, stat);
     switch (stat)
     {
     case ST_REQDOMAIN:
     {
         m_CurrentStatus.setText(u8"正在申请域名证书...");
+        SignUrl();
     }
     break;
     case ST_CHECKHARDWARE:
     {
         m_CurrentStatus.setText(u8"正在检查硬件配置...");
+        CheckHardWare();
+        
+        emit SetupQuickOnCurrentStatus(ST_CHECKSERVICE);
     }
     break;
     case ST_CHECKSERVICE:
     {
         m_CurrentStatus.setText(u8"正在检查系统服务...");
+        InstallQuickOnService();
+
+        if (m_ConfigQuickOnFailed)
+            break;
+        
+        emit SetupQuickOnCurrentStatus(ST_STARTSERVICE);
     }
     break;
     case ST_STARTSERVICE:
     {
         m_CurrentStatus.setText(u8"正在启动渠成服务...");
+        StartQuickOnService();
+        if (m_ConfigQuickOnFailed)
+            break;
+
+        emit SetupQuickOnStartStatus();
     }
     break;
     default:
+        m_LastStat = ST_DONE;
         break;
     }
+
+    m_RetryButton.setEnabled(m_ConfigQuickOnFailed);
+    m_RetryButton.setVisible(m_ConfigQuickOnFailed);
 }
 
-void MainWindow::OnSignUrl()
+void MainWindow::SignUrl()
 {
-    emit SetupQuickOnCurrentStatus(ST_REQDOMAIN);
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
     auto quickon = GetQuickOnService();
     std::shared_ptr<std::string> domain(new std::string);
     std::string message;
-    if (!quickon->QueryUrl(domain, message))
+    auto cb = [&](bool success, const std::string& message)
     {
-        m_CurrentStatus.setText(message.c_str());
-        return;
-    }
+        if (!success)
+        {
+            m_ConfigQuickOnFailed = true;
+            if (!message.empty())
+                m_CurrentStatus.setText(message.c_str());
+            else
+                m_CurrentStatus.setText(u8"申请域名证书失败");
+            return;
+        }
 
-    emit CheckHardWare();
+        m_ConfigQuickOnFailed = false;
+
+        emit SetupQuickOnCurrentStatus(ST_CHECKHARDWARE);
+    };
+    quickon->QueryUrl(cb);
 }
 
-void MainWindow::OnCheckHardWare()
+void MainWindow::CheckHardWare()
 {
-    emit SetupQuickOnCurrentStatus(ST_CHECKHARDWARE);
-    emit SetupQuickOnCurrentStatus(ST_CHECKSERVICE);
+    m_ConfigQuickOnFailed = false;
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
 }
 
-void MainWindow::OnInstallQuickOnService()
+void MainWindow::InstallQuickOnService()
 {
-    auto quickon = GetQuickOnService();
-    emit SetupQuickOnCurrentStatus(ST_STARTSERVICE);
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
+    m_ctr->oneSetup();
 }
 
-void MainWindow::OnStartQuickOnService()
+void MainWindow::StartQuickOnService()
 {
+    L_DEBUG("{0} @ {1}", __FUNCTION__, __LINE__);
+    m_ctr->reStart();
 }
 
 void MainWindow::OnSetupQuickOnStartStatus()
@@ -294,6 +337,21 @@ void MainWindow::OnInitMoveWindow()
 {
     resized();
     L_DEBUG("=========>>>>>>> {0}, {1}", __FUNCTION__, __LINE__);
+}
+
+void MainWindow::OnSaveQuickOnConfig()
+{
+    L_TRACE("{0} @ {1}", __FUNCTION__, __LINE__);
+    emit SetupQuickOnCurrentStatus(ST_REQDOMAIN);
+}
+
+void MainWindow::OnRetryConfig()
+{
+    if (m_LastStat >= ST_DONE)
+        return;
+
+    m_RetryButton.setEnabled(false);
+    emit SetupQuickOnCurrentStatus(m_LastStat);
 }
 
 void MainWindow::hideLog()
@@ -503,6 +561,7 @@ void MainWindow::adjustAfterLangImpl()
 
     // QuickOn
     m_btnStartQuickOn.setText(tlng("quickon.start"));
+    m_RetryButton.setText(tlng("quickon.retry"));
     m_SettingTitle.setText(tlng("quickon.title"));
     m_Dot.setText(tlng("quickon.dot"));
     QString domain = tlng("quickon.domain");
@@ -760,12 +819,19 @@ void MainWindow::createMainUI()
     connect(this, SIGNAL(SetupQuickOnInitStatus()), this, SLOT(OnSetupQuickOnInitStatus()));
     connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(StartQuickOnButtonsClicked()));
     connect(this, SIGNAL(StartQuickOnButtonsClicked()), this, SLOT(OnButtonStartQuickOn()));
+    connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SaveQuickOnConfig()));
+    connect(this, SIGNAL(SaveQuickOnConfig()), this, SLOT(OnSaveQuickOnConfig()));
     connect(this, SIGNAL(SetupQuickOnSettingStatus()), this, SLOT(OnSetupQuickOnSettingStatus()));
-    connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SetupQuickOnStartStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
     connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
-//    connect(&m_CustomizeDomain, SIGNAL(stateChanged(int)), this, SLOT(OnCustomizeDomain(int)));
+    connect(&m_RetryButton, SIGNAL(clicked()), this, SIGNAL(RetryConfig()));
+    connect(this, SIGNAL(RetryConfig()), this, SLOT(OnRetryConfig()));
 
+    connect(&m_StopQuickOn, SIGNAL(clicked()), this, SIGNAL(StopQuickOn()));
+    connect(this, SIGNAL(StopQuickOn()), this, SLOT(oneClickStop()));
+    connect(&m_VisitQuickOnPage, SIGNAL(clicked()), this, SIGNAL(VisitQuickOn()));
+    connect(this, SIGNAL(VisitQuickOn()), this, SLOT(clickVisit()));
+    
     m_QuickOnWidget.setProperty("forUse","QuickOn");
     m_QuickOnWidget.setLayout(&m_QuickOnLayer);
     m_QuickOnLayer.setSpacing(0);
@@ -783,6 +849,10 @@ void MainWindow::createMainUI()
     m_Pass.setProperty("forUse", "tip");
     m_UsrPass.setProperty("forUse", "tipEdit");
     m_SettingTitle.setObjectName("QuickOnTitle");
+    m_CurrentStatus.setProperty("forColor", "status");
+    m_RetryButton.setProperty("forUse", "uninstallBtn");
+
+    m_CurrentStatus.setAlignment(Qt::AlignCenter);
 
     m_Dot.setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
     m_UsrName.setEnabled(false);
@@ -802,6 +872,7 @@ void MainWindow::createMainUI()
     m_SettingLayout.addWidget(&m_ValidDomain, 0, Qt::AlignHCenter);
     m_SettingLayout.addWidget(&m_SettingSave, 0, Qt::AlignHCenter);
     m_QuickOnLayer.addWidget(&m_CurrentStatus);
+    m_QuickOnLayer.addWidget(&m_RetryButton);
     m_QuickOnLayer.addWidget(&m_StartWidget);
     m_StartWidget.setLayout(&m_StartLayer);
     m_StartLayer.setSpacing(0);
@@ -1005,29 +1076,31 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-
-//        if (m_CustomizeDomain.isVisible())
-//        {
-//            QRect geometry = m_CustomizeDomain.geometry();
-//            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
-//            if (geometry.contains(pt))
-//            {
-//                m_CustomizeDomain.setChecked(!m_CustomizeDomain.isChecked());
-//                event->accept();
-//                return;
-//            }
-//        }
-//        else 
-        if (m_btnStartQuickOn.isVisible())
+        auto is_widget_clicked = [&](QWidget* widget)
         {
-            QRect geometry = m_btnStartQuickOn.geometry();
-            QPoint pt = m_QuickOnWidget.mapFromGlobal(event->globalPos());
-            if (geometry.contains(pt))
-            {
-                emit StartQuickOnButtonsClicked();
-                event->accept();
-                return;
-            }
+            if (!widget->isVisible())
+                return false;
+
+            QRect geometry = widget->geometry();
+            QPoint pt = widget->mapFromGlobal(event->globalPos());
+            if (!geometry.contains(pt))
+                return false;
+
+            event->accept();
+            return true;
+        };
+
+        if (is_widget_clicked(&m_btnStartQuickOn))
+        {
+            L_TRACE("-----------------------");
+            emit StartQuickOnButtonsClicked();
+            return;
+        }
+        if (is_widget_clicked(&m_SettingSave))
+        {
+            L_TRACE("+++++++++++++++++++++++");
+            emit SaveQuickOnConfig();
+            return;
         }
         m_Drag = true;
         m_DragPosition = event->globalPos() - this->pos();

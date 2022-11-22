@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     printf("QSslSocket= %s, supportsSsl = %s\n", QSslSocket::sslLibraryBuildVersionString().toStdString().c_str(), QSslSocket::supportsSsl() ? "true" : "false");
 
     qRegisterMetaType<std::shared_ptr<std::string>>("std::shared_ptr<std::string>");
+    qRegisterMetaType<std::function<void(const std::string&)>>("std::function<void(const std::string&)>");
 
 #ifdef USE_SPDLOG_
 #ifdef Q_OS_WIN

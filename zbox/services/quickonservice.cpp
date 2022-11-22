@@ -86,22 +86,30 @@ QuickOnService::~QuickOnService()
         CloseServiceHandle(m_hScHandle);
 }
 
+void QuickOnService::ReBindHttpPost(const std::function<void(std::shared_ptr<std::string>, std::shared_ptr<std::string>)>& cb)
+{
+    disconnect(this, &QuickOnService::HttpPostData, 0, 0);
+    connect(this, &QuickOnService::HttpPostData, cb);
+}
+
 bool QuickOnService::IsLocalConfigExist()
 {
-    std::shared_ptr<std::string> domain(new std::string);
+    std::string domain;
     return QueryUrlLocal(domain);
 }
 
-bool QuickOnService::QueryUrl(std::shared_ptr<std::string> domain, std::string& message)
+void QuickOnService::QueryUrl(std::function<void(bool, const std::string&)> cb)
 {
+    std::string domain;
     if (QueryUrlLocal(domain))
-        return true;
+    {
+        cb(true, domain);
+        return;
+    }
 
-    if (!QueryUrlNet(domain, message))
-        return false;
-
-    quickon_record record;
-    return SignUrl(domain, message, record);
+    QueryUrlNet(cb);
+//    quickon_record record;
+//    return SignUrl(domain, message, record);
 }
 
 bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& message, quickon_record& record)
@@ -121,19 +129,22 @@ bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& m
     QString json = doc.toJson(QJsonDocument::Compact);
 
     std::shared_ptr<std::string> url_str(new std::string)
-                            , json_str(new std::string(json.toStdString()))
-                            , reply_str(new std::string);
+                            , json_str(new std::string(json.toStdString()));
 
     url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/record");
 
     L_TRACE("************ {0} @ {1} START EMIT", __FUNCTION__, __LINE__);
-    emit HttpPostData(url_str, json_str, reply_str);
-    L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
-    L_TRACE("reply: = {0}", reply_str->c_str());
+    auto post_data = [&](std::shared_ptr<std::string> url, std::shared_ptr<std::string> data)
+    {
+        m_ctr->MainWin()->OnHttpPostData(url, data);
+        L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
+    };
+    ReBindHttpPost(post_data);
+    emit HttpPostData(url_str, json_str);
 
     // todo: ret
     return true;
-
+/*
     bool ret = !reply_str->empty();
     QJsonParseError e;
     doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
@@ -157,6 +168,7 @@ bool QuickOnService::SignUrl(std::shared_ptr<std::string> domain, std::string& m
     record.k8s_tls = data_obj["k8s-tls"].toString().toStdString();
     
     return ret;
+    */
 }
 
 void QuickOnService::QueryPortRnd(int& http_port, int& https_port)
@@ -322,21 +334,19 @@ int QuickOnService::ExecCmd(char read_buffer[], Service *service, SendProxy *pro
 
 void QuickOnService::SetupSignal()
 {
-    connect(this, SIGNAL(HttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
-        , m_ctr->MainWin(), SLOT(OnHttpPostData(std::shared_ptr<std::string>, std::shared_ptr<std::string>, std::shared_ptr<std::string>))
-        , Qt::BlockingQueuedConnection);
     connect(this, SIGNAL(NotifyQuickOnInfo(std::shared_ptr<std::string>, int, int))
         , m_ctr->MainWin(), SLOT(OnNotifyQuickOnInfo(std::shared_ptr<std::string>, int, int))
         , Qt::QueuedConnection);
 
-    std::shared_ptr<std::string> domain(new std::string);
+    std::string domain;
     int http_port = 0, https_port = 0;
 
     QueryUrlLocal(domain);
     QueryPortLocal(http_port, https_port);
 
+    std::shared_ptr<std::string> domain_ptr(new std::string(domain));
     L_TRACE("======> {0} - {1}", http_port, https_port);
-    emit NotifyQuickOnInfo(domain, http_port, https_port);
+    emit NotifyQuickOnInfo(domain_ptr, http_port, https_port);
 }
 
 bool QuickOnService::installServiceImpl(SendProxy *proxy)
@@ -407,67 +417,69 @@ bool QuickOnService::startServiceImpl(SendProxy *proxy)
     }
 
     std::shared_ptr<std::string> domain(new std::string);
-    std::string message;
-    if (!QueryUrl(domain, message))
+    auto cb = [&](bool success, const std::string& message)
     {
-        L_ERROR("QueryUrl Failed: {0} @ {1}", __FUNCTION__, __LINE__);
-        proxy->toSend(getErrorMsg(message.c_str()));
-        return false;
-    }
-    L_TRACE("{0} @ {1} domain: {2}", __FUNCTION__, __LINE__, domain->c_str());
+        if (!success)
+        {
+            L_ERROR("QueryUrl Failed: {0} @ {1}", __FUNCTION__, __LINE__);
+            proxy->toSend(getErrorMsg(message.c_str()));
+            return;
+        }
 
-    int http_port = 0, https_port = 0;
-    QueryPortLocal(http_port, https_port);
-    if (!http_port || !https_port)
-        QueryPortRnd(http_port, https_port);
+        L_TRACE("{0} @ {1} domain: {2}", __FUNCTION__, __LINE__, domain->c_str());
 
-    printf("======> %d - %d\n", http_port, https_port);
-    
-    SaveInitEnv(domain, http_port, https_port);
+        int http_port = 0, https_port = 0;
+        QueryPortLocal(http_port, https_port);
+        if (!http_port || !https_port)
+            QueryPortRnd(http_port, https_port);
 
-    emit NotifyQuickOnInfo(domain, 0, 0);
+        printf("======> %d - %d\n", http_port, https_port);
 
-    // 启动虚拟机
-    printf("$$$$$$$$$$ %s @ %d: startvm\n", __FUNCTION__, __LINE__);
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
-    {
-        proxy->toSend(getErrorMsg(read_buffer));
-        return false;
-    }
+        SaveInitEnv(domain, http_port, https_port);
 
-    // 端口转发
-    // 80
-    printf("$$$$$$$$$$ %s @ %d: natpf1 80\n", __FUNCTION__, __LINE__);
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, http_port) <= 0)
-    {
-        proxy->toSend(getErrorMsg(read_buffer));
-        return false;
-    }
-    // 443
-    printf("$$$$$$$$$$ %s @ %d: natpf1 443\n", __FUNCTION__, __LINE__);
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,443\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, https_port) <= 0)
-    {
-        proxy->toSend(getErrorMsg(read_buffer));
-        return false;
-    }
+        emit NotifyQuickOnInfo(domain, 0, 0);
 
-    // 设置共享目录
-    printf("$$$$$$$$$$ %s @ %d: sharedfolder\n", __FUNCTION__, __LINE__);
-    if (ExecCmd(read_buffer, this, proxy, "\"%s\" sharedfolder add %s --name=env --hostpath=\"%s\\init\" --readonly --transient --automount --auto-mount-point=/mnt\r\n", g_szVBoxManager, OVA_QUICKON_NAME, g_szVirtualBoxHome) <= 0)
-    {
-        proxy->toSend(getErrorMsg(read_buffer));
-        return false;
-    }
+        // 启动虚拟机
+        printf("$$$$$$$$$$ %s @ %d: startvm\n", __FUNCTION__, __LINE__);
+        if (ExecCmd(read_buffer, this, proxy, "\"%s\" startvm %s --type headless\r\n", g_szVBoxManager, OVA_QUICKON_NAME) <= 0)
+        {
+            proxy->toSend(getErrorMsg(read_buffer));
+            return;
+        }
 
-    printf("$$$$$$$$$$ %s @ %d: startServiceImpl\n", __FUNCTION__, __LINE__);
-    if (!Service::startServiceImpl(proxy))
-        return false;
+        // 端口转发
+        // 80
+        printf("$$$$$$$$$$ %s @ %d: natpf1 80\n", __FUNCTION__, __LINE__);
+        if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"http,tcp,,%d,,80\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, http_port) <= 0)
+        {
+            proxy->toSend(getErrorMsg(read_buffer));
+            return;
+        }
+        // 443
+        printf("$$$$$$$$$$ %s @ %d: natpf1 443\n", __FUNCTION__, __LINE__);
+        if (ExecCmd(read_buffer, this, proxy, "\"%s\" controlvm \"%s\" natpf1 \"https,tcp,,%d,,443\"\r\n", g_szVBoxManager, OVA_QUICKON_NAME, https_port) <= 0)
+        {
+            proxy->toSend(getErrorMsg(read_buffer));
+            return;
+        }
 
-    emit NotifyQuickOnInfo(domain, http_port, https_port);
+        // 设置共享目录
+        printf("$$$$$$$$$$ %s @ %d: sharedfolder\n", __FUNCTION__, __LINE__);
+        if (ExecCmd(read_buffer, this, proxy, "\"%s\" sharedfolder add %s --name=env --hostpath=\"%s\\init\" --readonly --transient --automount --auto-mount-point=/mnt\r\n", g_szVBoxManager, OVA_QUICKON_NAME, g_szVirtualBoxHome) <= 0)
+        {
+            proxy->toSend(getErrorMsg(read_buffer));
+            return;
+        }
 
-    printf("$$$$$$$$$$ %s @ %d: DONE\n", __FUNCTION__, __LINE__);
+        printf("$$$$$$$$$$ %s @ %d: startServiceImpl\n", __FUNCTION__, __LINE__);
+        if (!Service::startServiceImpl(proxy))
+            return;
 
-    return true;
+        emit NotifyQuickOnInfo(domain, http_port, https_port);
+
+        printf("$$$$$$$$$$ %s @ %d: DONE\n", __FUNCTION__, __LINE__);
+    };
+    QueryUrl(cb);
 }
 
 bool QuickOnService::stopServiceImpl(SendProxy *proxy)
@@ -648,7 +660,7 @@ void QuickOnService::VBoxManageFullPath()
     CloseHandle(hProcess);
 }
 
-bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
+bool QuickOnService::QueryUrlLocal(std::string& domain)
 {
     /*
         QUICKON_DOMAIN=demo.haogs.cn
@@ -675,19 +687,19 @@ bool QuickOnService::QueryUrlLocal(std::shared_ptr<std::string> domain)
             if (!p)
                 break;
             p++;
-            *domain = p;
-            while (*domain->rbegin() == '\r' || *domain->rbegin() == '\n')
-                domain->pop_back();
+            domain = p;
+            while (*domain.rbegin() == '\r' || *domain.rbegin() == '\n')
+                domain.pop_back();
             break;
         }
     }
     fclose(fp);
 
-    L_TRACE("----- domain = {0}", domain->c_str());
-    return !domain->empty();
+    L_TRACE("----- domain = {0}", domain.c_str());
+    return !domain.empty();
 }
 
-bool QuickOnService::QueryUrlNet(std::shared_ptr<std::string> domain, std::string& message)
+bool QuickOnService::QueryUrlNet(std::function<void(bool, const std::string&)> cb)
 {
     QJsonObject obj;
     obj.insert("domain", "");
@@ -699,39 +711,48 @@ bool QuickOnService::QueryUrlNet(std::shared_ptr<std::string> domain, std::strin
     QString json = doc.toJson(QJsonDocument::Compact);
 
     std::shared_ptr<std::string> url_str(new std::string)
-                            , json_str(new std::string(json.toStdString()))
-                            , reply_str(new std::string);
+                            , json_str(new std::string(json.toStdString()));
 
+    std::string domain;
     url_str->append(QUICK_ON_HOST).append("/api/qdnsv2/oss/custom");
 
     L_TRACE("************ {0} @ {1} START EMIT", __FUNCTION__, __LINE__);
-    emit HttpPostData(url_str, json_str, reply_str);
-    bool ret = !reply_str->empty();
-    L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
-    L_TRACE("reply = {0}", reply_str->c_str());
-    QJsonParseError e;
-    doc = QJsonDocument::fromJson(reply_str->c_str(), &e);
-    if (doc.isNull() || e.error != QJsonParseError::NoError)
-		return false;
-
-    if (!ret || doc["code"].toInt() != 200)
+    auto post_data = [&](std::shared_ptr<std::string> url, std::shared_ptr<std::string> data)
     {
-        message = doc["message"].toString().toStdString();
-        L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
-        return false;
-    }
+        auto reply_str = m_ctr->MainWin()->OnHttpPostData(url, data);
 
-    auto data = doc["data"];
-    if (data.isUndefined() || data.isNull())
-    {
-        L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
-        return false;
-    }
+        bool ret = !reply_str.empty();
+        L_TRACE("************ {0} @ {1} END EMIT", __FUNCTION__, __LINE__);
+        L_TRACE("reply = {0}", reply_str.c_str());
+        QJsonParseError e;
+        doc = QJsonDocument::fromJson(reply_str.c_str(), &e);
+        if (doc.isNull() || e.error != QJsonParseError::NoError)
+        {
+            cb(false, "");
+            return;
+        }
 
-    auto data_obj = data.toObject();
-    *domain = data_obj["domain"].toString().toStdString();
-    
-    return !domain->empty();
+        if (!ret || doc["code"].toInt() != 200)
+        {
+            L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
+            cb(false, doc["message"].toString().toStdString());
+            return;
+        }
+
+        auto reply_data = doc["data"];
+        if (reply_data.isUndefined() || reply_data.isNull())
+        {
+            L_ERROR("{0} @ {1}", __FUNCTION__, __LINE__);
+            cb(false, "");
+            return;
+        }
+
+        auto data_obj = reply_data.toObject();
+        domain = data_obj["domain"].toString().toStdString();
+        cb(true, domain);
+    };
+    ReBindHttpPost(post_data);
+    emit HttpPostData(url_str, json_str);
 }
 
 void QuickOnService::QueryPortLocal(int& http_port, int& https_port)
