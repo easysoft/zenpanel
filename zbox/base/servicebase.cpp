@@ -409,6 +409,16 @@ void ServiceBase::openBrowser()
     QDesktopServices::openUrl(QUrl(url));
 }
 
+void ServiceBase::openSubUrl(const QString& suburl)
+{
+    QString port = GParams::instance()->getParam("APACHE_PORT");
+    QString url = "http://127.0.0.1:" + port + "/" + suburl;
+    if(port.isEmpty())
+        url = "http://127.0.0.1/" + suburl;
+
+    QDesktopServices::openUrl(QUrl(url));
+}
+
 void ServiceBase::openLog()
 {
     QString url = EnvUtil::getPath("tmp/logs/" + log());

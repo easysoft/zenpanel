@@ -361,6 +361,7 @@ QCheckBox {
 QLabel[forUse='setting'] {
     color:rgba(255,255,255,70%);
     font-size: 12px;
+    padding-bottom: 1px;
 }
 
 /* button link --------------------------------------------------*/

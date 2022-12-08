@@ -102,6 +102,7 @@ void ServiceControl::adjustAfterLangChanged()
 {
     m_visitAction->setText(tlng("menu.visit"));
     m_viewLogAction->setText(tlng("menu.viewLog"));
+    m_ManagerMySQL->setText(tlng("menu.managerMySQL"));
     m_modifyPortAction->setText(tlng("menu.modifyPort"));
     m_modifyUserAction->setText(tlng("menu.modifyUser"));
     m_installServiceAction->setText(tlng("menu.install"));
@@ -138,6 +139,16 @@ void ServiceControl::stateChanged(QString state)
     refreshState();
 }
 
+void ServiceControl::HideManagerMySQL()
+{
+    m_ManagerMySQL->setVisible(false);
+}
+
+void ServiceControl::ShowManagerMySQL()
+{
+    m_ManagerMySQL->setVisible(true);
+}
+
 void ServiceControl::initMenu()
 {
 
@@ -150,6 +161,7 @@ void ServiceControl::initMenu()
     //main function button
     m_visitAction = new QAction(m_menu);
     m_viewLogAction = new QAction(m_menu);
+    m_ManagerMySQL = new QAction(m_menu);
     m_modifyPortAction = new QAction(m_menu);
     m_modifyUserAction = new QAction(m_menu);
     m_installServiceAction = new QAction(m_menu);
@@ -160,6 +172,7 @@ void ServiceControl::initMenu()
 
     if(m_service->launch().isEmpty() == false) m_menu->addAction(m_visitAction);
     if(m_service->log().isEmpty() == false) m_menu->addAction(m_viewLogAction);
+    if(m_service->serviceName() == "mysqlzt") m_menu->addAction(m_ManagerMySQL);
     if(m_service->canChangePort() == true) m_menu->addAction(m_modifyPortAction);
     if(m_service->canChangeUser() == true) m_menu->addAction(m_modifyUserAction);
 
@@ -185,6 +198,7 @@ void ServiceControl::initMenu()
 
     connect(m_visitAction,SIGNAL(triggered()),this,SLOT(onVisitClick()));
     connect(m_viewLogAction,SIGNAL(triggered()),this,SLOT(onViewLogClick()));
+    connect(m_ManagerMySQL,SIGNAL(triggered()),this,SLOT(onManagerMySQL()));
 
     connect(m_modifyPortAction,SIGNAL(triggered()),this,SLOT(onModifyPortClick()));
     connect(m_modifyUserAction,SIGNAL(triggered()),this,SLOT(onModifyAccountClick()));
@@ -346,6 +360,11 @@ void ServiceControl::onVisitClick()
     m_service->openBrowser();
 }
 
+void ServiceControl::onManagerMySQL()
+{
+    m_service->openSubUrl("adminer/");
+}
+
 void ServiceControl::onViewLogClick()
 {
     m_service->openLog();
@@ -355,6 +374,7 @@ void ServiceControl::refreshMenu()
 {
     m_visitAction->setEnabled(false);
     m_viewLogAction->setEnabled(false);
+    m_ManagerMySQL->setEnabled(false);
     m_modifyPortAction->setEnabled(false);
     m_modifyUserAction->setEnabled(false);
     m_installServiceAction->setEnabled(false);
@@ -373,6 +393,7 @@ void ServiceControl::refreshMenu()
     {
         m_visitAction->setEnabled(true);
         m_viewLogAction->setEnabled(true);
+        m_ManagerMySQL->setEnabled(true);
         m_modifyPortAction->setEnabled(true);
         m_modifyUserAction->setEnabled(true);
         m_installServiceAction->setEnabled(false);

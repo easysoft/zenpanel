@@ -66,6 +66,7 @@ public:
     QString initializeCheck();
 
     void openBrowser();
+    void openSubUrl(const QString& url);
     void openLog();
 
     virtual void refreshState();

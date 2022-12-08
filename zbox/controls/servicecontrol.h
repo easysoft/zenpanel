@@ -27,6 +27,9 @@ public:
     void adjustAfterLangChanged();
     void stateChanged(QString typeAndState);
 
+    void HideManagerMySQL();
+    void ShowManagerMySQL();
+
 private:
     QString m_state;
     QString m_descTpl;
@@ -52,6 +55,7 @@ private:
 
     QAction *m_visitAction;
     QAction *m_viewLogAction;
+    QAction *m_ManagerMySQL;
     QAction *m_modifyPortAction;
     QAction *m_modifyUserAction;
     QAction *m_installServiceAction;
@@ -70,6 +74,7 @@ private:
 private slots:
     void onVisitClick();
     void onViewLogClick();
+    void onManagerMySQL();
 
     void onModifyPortClick();
     void onModifyAccountClick();

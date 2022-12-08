@@ -167,3 +167,4 @@ menu:
   startService: Start Service
   reinstall: Reinstall Service
   uninstall: Uninstall Service
+  managerMySQL: Open the management page
