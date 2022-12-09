@@ -107,7 +107,6 @@ int main(int argc, char *argv[])
 
 static int CheckEnv(QCommandLineParser& parser)
 {
-    return 0;
     if (!IsWindows8OrGreater()) // < win10 || server2016
     {
         QMessageBox::information(nullptr, u8"提示", u8"系统版本过低");
