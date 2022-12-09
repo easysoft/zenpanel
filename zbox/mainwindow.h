@@ -86,47 +86,49 @@ private:
     ZPopupButton* m_UninstallSvrBtn;
     ZPopupButton* m_ReisntallSvrBtn;
     
-    QVBoxLayout m_QuickOnLayer;
-    QWidget m_QuickOnWidget;
+    QVBoxLayout* m_QuickOnLayer;
+    QWidget* m_QuickOnWidget;
     // NO.1，启动渠成软件百宝箱
-    QPushButton m_btnStartQuickOn;
+    QWidget* m_PreStartWidget;
+    QHBoxLayout* m_PreStartLayout;
+    QPushButton* m_btnStartQuickOn;
 
     // NO.2, 设置域名
-    QWidget m_SettingWidget;
-    QVBoxLayout m_SettingLayout;
-    QLabel m_SettingTitle;
+    QWidget* m_SettingWidget;
+    QVBoxLayout* m_SettingLayout;
+    QLabel* m_SettingTitle;
 
-    QHBoxLayout m_DomainLayer;
-    QLineEdit m_Domain0;
-    QLabel m_Dot;
-    QComboBox m_Domain1;
+    QHBoxLayout* m_DomainLayer;
+    QLineEdit* m_Domain0;
+    QLabel* m_Dot;
+    QComboBox* m_Domain1;
 
 //    QCheckBox m_CustomizeDomain;
 
-    QLabel m_ValidDomain;
-    QPushButton m_SettingSave;
+    QLabel* m_ValidDomain;
+    QPushButton* m_SettingSave;
 
     // NO.3, 当前状态显示
-    QLabel m_CurrentStatus;
-    QPushButton m_RetryButton;
+    QLabel* m_CurrentStatus;
+    QPushButton* m_RetryButton;
 
     // NO.4，成功启动界面
-    QWidget m_StartWidget;
-    QVBoxLayout m_StartLayer;
+    QWidget* m_StartWidget;
+    QVBoxLayout* m_StartLayer;
 
-    QHBoxLayout m_StartButtonsLayer;
-    QPushButton m_StopQuickOn;
-    QPushButton m_VisitQuickOnPage;
+    QHBoxLayout* m_StartButtonsLayer;
+    QPushButton* m_StopQuickOn;
+    QPushButton* m_VisitQuickOnPage;
 
-    QHBoxLayout m_UserLayer;
-    QLabel m_Usr;
-    QLineEdit m_UsrName;
-    QLabel m_Pass;
-    QLineEdit m_UsrPass;
+    QHBoxLayout* m_UserLayer;
+    QLabel* m_Usr;
+    QLineEdit* m_UsrName;
+    QLabel* m_Pass;
+    QLineEdit* m_UsrPass;
     bool m_ConfigQuickOnFailed;
     int m_LastStat;
 
-    QTimer m_InitMoveTimer;
+    QTimer* m_InitMoveTimer;
 
     ZHttpRequest m_HttpReq;
     std::string m_Domain;

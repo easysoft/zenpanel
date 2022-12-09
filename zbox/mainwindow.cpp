@@ -36,27 +36,7 @@
 
 MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     : QMainWindow(parent)
-    , m_QuickOnLayer()
-    , m_QuickOnWidget(this)
-    , m_btnStartQuickOn()
-    , m_SettingWidget()
-    , m_SettingLayout()
-    , m_SettingTitle()
-    , m_DomainLayer()
-    , m_Domain0()
-    , m_Dot()
-    , m_Domain1()
-    , m_ValidDomain()
-    , m_SettingSave()
-    , m_CurrentStatus()
-    , m_RetryButton()
-    , m_StopQuickOn()
-    , m_VisitQuickOnPage()
-    , m_Usr()
-    , m_UsrName()
-    , m_Pass()
-    , m_UsrPass()
-    , m_InitMoveTimer(this)
+    , m_InitMoveTimer(new QTimer(this))
     , m_HttpReq(this)
     , m_ConfigQuickOnFailed(false)
     , m_LastStat(ST_REQDOMAIN)
@@ -85,12 +65,12 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
 
     m_globalControl = nullptr;
 
-    m_InitMoveTimer.setInterval(3);
-	m_InitMoveTimer.setSingleShot(true);
-    connect(&m_InitMoveTimer, SIGNAL(timeout()), this, SLOT(OnInitMoveWindow()));
+    m_InitMoveTimer->setInterval(3);
+    m_InitMoveTimer->setSingleShot(true);
+    connect(m_InitMoveTimer, SIGNAL(timeout()), this, SLOT(OnInitMoveWindow()));
 
     loadLang();
-    loadTheme(); 
+    loadTheme();
 
     createLogo();
     createFooter();
@@ -115,7 +95,7 @@ MainWindow::MainWindow(Controller *ctr,QWidget *parent)
     emit SetupQuickOnInitStatus();
     emit togglelog();
 
-    m_InitMoveTimer.start();
+    m_InitMoveTimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -155,7 +135,7 @@ void MainWindow::resized()
 
     adjustAfterLang();
 
-    m_QuickOnWidget.move((width() - m_QuickOnWidget.width()) / 2, (height() - m_QuickOnWidget.height()) / 2);
+    m_QuickOnWidget->move((width() - m_QuickOnWidget->width()) / 2, (height() - m_QuickOnWidget->height()) / 2);
 
     L_DEBUG("===================================== {0}, {1}", width(), height());
 }
@@ -169,7 +149,7 @@ std::string MainWindow::OnHttpPostData(std::shared_ptr<std::string> url, std::sh
     std::string reply;
     if (!m_HttpReq.Exec(reply))
     {
-        L_ERROR("!!!!!!!!!! HTTP Exec FAILED");
+        L_ERROR("!!!!!!!!!! HTTP Exec FAILED, {0}", reply.c_str());
         return reply;
     }
 
@@ -190,66 +170,66 @@ void MainWindow::OnNotifyQuickOnInfo(const std::shared_ptr<std::string> domain, 
 // Setup UI status
 void MainWindow::OnSetupQuickOnInitStatus()
 {
-    m_btnStartQuickOn.setVisible(true);
-    m_SettingWidget.setVisible(false);
-    m_CurrentStatus.setVisible(false);
-    m_RetryButton.setVisible(false);
-    m_StartWidget.setVisible(false);
+    m_PreStartWidget->setVisible(true);
+    m_SettingWidget->setVisible(false);
+    m_CurrentStatus->setVisible(false);
+    m_RetryButton->setVisible(false);
+    m_StartWidget->setVisible(false);
 }
 
 void MainWindow::OnSetupQuickOnSettingStatus()
 {
-    m_btnStartQuickOn.setVisible(false);
-    m_SettingWidget.setVisible(true);
-    m_CurrentStatus.setVisible(false);
-    m_RetryButton.setVisible(false);
-    m_StartWidget.setVisible(false);
+    m_PreStartWidget->setVisible(false);
+    m_SettingWidget->setVisible(true);
+    m_CurrentStatus->setVisible(false);
+    m_RetryButton->setVisible(false);
+    m_StartWidget->setVisible(false);
 }
 
 void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
 {
-    m_btnStartQuickOn.setVisible(false);
-    m_SettingWidget.setVisible(false);
-    m_CurrentStatus.setVisible(true);
-    m_RetryButton.setVisible(false);
-    m_StartWidget.setVisible(false);
+    m_PreStartWidget->setVisible(false);
+    m_SettingWidget->setVisible(false);
+    m_CurrentStatus->setVisible(true);
+    m_RetryButton->setVisible(false);
+    m_StartWidget->setVisible(false);
 
     m_LastStat = stat;
-    m_RetryButton.setEnabled(false);
+    m_RetryButton->setEnabled(false);
     L_TRACE("!!!!!!!!!!!!!!!!!!!!!!!!! {0} @ {1} => {2}", __FUNCTION__, __LINE__, stat);
     switch (stat)
     {
     case ST_REQDOMAIN:
     {
-        m_CurrentStatus.setText(u8"正在申请域名证书...");
+        m_CurrentStatus->setText(u8"正在申请域名证书...");
         SignUrl();
     }
     break;
     case ST_CHECKHARDWARE:
     {
-        m_CurrentStatus.setText(u8"正在检查硬件配置...");
+        m_CurrentStatus->setText(u8"正在检查硬件配置...");
         CheckHardWare();
-        
+
         emit SetupQuickOnCurrentStatus(ST_CHECKSERVICE);
     }
     break;
     case ST_CHECKSERVICE:
     {
-        m_CurrentStatus.setText(u8"正在检查系统服务...");
+        m_CurrentStatus->setText(u8"正在检查系统服务...");
         InstallQuickOnService();
 
         if (m_ConfigQuickOnFailed)
         {
-            m_CurrentStatus.setText(u8"系统服务安装失败");
+            m_CurrentStatus->setText(u8"系统服务安装失败");
             break;
         }
-        
+
         emit SetupQuickOnCurrentStatus(ST_STARTSERVICE);
     }
     break;
     case ST_STARTSERVICE:
     {
-        m_CurrentStatus.setText(u8"正在启动渠成服务...");
+        m_CurrentStatus->setText(u8"正在启动渠成服务...");
         StartQuickOnService();
         if (m_ConfigQuickOnFailed)
             break;
@@ -262,8 +242,8 @@ void MainWindow::OnSetupQuickOnCurrentStatus(int stat)
         break;
     }
 
-    m_RetryButton.setEnabled(m_ConfigQuickOnFailed);
-    m_RetryButton.setVisible(m_ConfigQuickOnFailed);
+    m_RetryButton->setEnabled(m_ConfigQuickOnFailed);
+    m_RetryButton->setVisible(m_ConfigQuickOnFailed);
 }
 
 void MainWindow::SignUrl()
@@ -278,9 +258,9 @@ void MainWindow::SignUrl()
         {
             m_ConfigQuickOnFailed = true;
             if (!message.empty())
-                m_CurrentStatus.setText(message.c_str());
+                m_CurrentStatus->setText(message.c_str());
             else
-                m_CurrentStatus.setText(u8"申请域名证书失败");
+                m_CurrentStatus->setText(u8"申请域名证书失败");
             return;
         }
 
@@ -290,8 +270,8 @@ void MainWindow::SignUrl()
         emit SetupQuickOnCurrentStatus(ST_CHECKHARDWARE);
     };
 
-    std::string usr_sub = m_Domain0.text().toStdString();
-    std::string usr_domain = m_Domain1.currentText().toStdString();
+    std::string usr_sub = m_Domain0->text().toStdString();
+    std::string usr_domain = m_Domain1->currentText().toStdString();
     quickon->QueryUrl(usr_domain, usr_sub, cb);
 }
 
@@ -320,10 +300,10 @@ void MainWindow::StartQuickOnService()
 
 void MainWindow::OnSetupQuickOnStartStatus()
 {
-    m_btnStartQuickOn.setVisible(false);
-    m_SettingWidget.setVisible(false);
-    m_CurrentStatus.setVisible(false);
-    m_StartWidget.setVisible(true);
+    m_PreStartWidget->setVisible(false);
+    m_SettingWidget->setVisible(false);
+    m_CurrentStatus->setVisible(false);
+    m_StartWidget->setVisible(true);
 }
 
 void MainWindow::OnButtonStartQuickOn()
@@ -362,7 +342,7 @@ void MainWindow::OnRetryConfig()
     if (m_LastStat >= ST_DONE)
         return;
 
-    m_RetryButton.setEnabled(false);
+    m_RetryButton->setEnabled(false);
     emit SetupQuickOnCurrentStatus(m_LastStat);
 }
 
@@ -541,22 +521,22 @@ void MainWindow::adjustAfterLangImpl()
     m_menuWidget->adjustAfterLang();
 
     // QuickOn
-    m_btnStartQuickOn.setText(tlng("quickon.start"));
-    m_RetryButton.setText(tlng("quickon.retry"));
-    m_SettingTitle.setText(tlng("quickon.title"));
-    m_Dot.setText(tlng("quickon.dot"));
+    m_btnStartQuickOn->setText(tlng("quickon.start"));
+    m_RetryButton->setText(tlng("quickon.retry"));
+    m_SettingTitle->setText(tlng("quickon.title"));
+    m_Dot->setText(tlng("quickon.dot"));
     QString domain = tlng("quickon.domain");
     QStringListModel* domain_list = new QStringListModel(domain.split(","));
-    m_Domain1.setModel(domain_list);
+    m_Domain1->setModel(domain_list);
 //    m_CustomizeDomain.setText(tlng("quickon.customize"));
-    m_SettingSave.setText(tlng("quickon.save"));
+    m_SettingSave->setText(tlng("quickon.save"));
 
-    m_StopQuickOn.setText(tlng("quickon.stop"));
-    m_VisitQuickOnPage.setText(tlng("quickon.visit"));
-    m_Usr.setText(tlng("quickon.usr") + u8":");
-    m_UsrName.setText(tlng("quickon.defaultusr"));
-    m_Pass.setText(tlng("quickon.pass") + u8":");
-    m_UsrPass.setText(tlng("quickon.defaultpass"));
+    m_StopQuickOn->setText(tlng("quickon.stop"));
+    m_VisitQuickOnPage->setText(tlng("quickon.visit"));
+    m_Usr->setText(tlng("quickon.usr") + u8":");
+    m_UsrName->setText(tlng("quickon.defaultusr"));
+    m_Pass->setText(tlng("quickon.pass") + u8":");
+    m_UsrPass->setText(tlng("quickon.defaultpass"));
 
     m_leftLayout->setContentsMargins(ts(4),ts(5),ts(4),ts(5));
     m_leftLayout->setSpacing(ts(1));
@@ -686,7 +666,7 @@ void MainWindow::createSetingMenu(QPushButton *btn)
 void MainWindow::showMenu()
 {
     QRect geometry = m_leftWidget->geometry();
-    QPoint pos(geometry.x() + geometry.width()/2,geometry.y());
+    QPoint pos(geometry.x() + geometry.width()/2 + 15,geometry.y() + 10);
 
     m_menuWidget->move(pos);
 
@@ -714,82 +694,122 @@ void MainWindow::createMainUI()
 //    connect(m_globalControl, SIGNAL(oneClickSetup()), this, SLOT(OneClickSetup()));
 //    connect(m_globalControl, SIGNAL(oneClickStop()), this, SLOT(oneClickStop()));
 //    connect(m_globalControl, SIGNAL(clickVisit()), this, SLOT(clickVisit()));
+    m_QuickOnLayer = new QVBoxLayout;
+    m_QuickOnWidget = new QWidget(this);
+
+    m_PreStartWidget = new QWidget(this);
+    m_PreStartLayout = new QHBoxLayout;
+    m_btnStartQuickOn = new QPushButton;
+
+    m_SettingWidget = new QWidget(this);
+    m_SettingLayout = new QVBoxLayout;
+    m_SettingTitle = new QLabel;
+    m_DomainLayer = new QHBoxLayout(this);
+    m_Domain0 = new QLineEdit;
+    m_Dot = new QLabel;
+    m_Domain1 = new QComboBox;
+
+    m_ValidDomain = new QLabel;
+    m_SettingSave = new QPushButton;
+
+    m_CurrentStatus = new QLabel;
+    m_RetryButton = new QPushButton;
+
+    m_StartWidget = new QWidget(this);
+    m_StartLayer = new QVBoxLayout;
+
+    m_StartButtonsLayer = new QHBoxLayout;
+    m_StopQuickOn = new QPushButton;
+    m_VisitQuickOnPage = new QPushButton;
+
+    m_UserLayer = new QHBoxLayout;
+    m_Usr = new QLabel;
+    m_UsrName = new QLineEdit;
+    m_Pass = new QLabel;
+    m_UsrPass = new QLineEdit;
 
     connect(this, SIGNAL(SetupQuickOnInitStatus()), this, SLOT(OnSetupQuickOnInitStatus()));
-    connect(&m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(StartQuickOnButtonsClicked()));
+    connect(m_btnStartQuickOn, SIGNAL(clicked()), this, SIGNAL(StartQuickOnButtonsClicked()));
     connect(this, SIGNAL(StartQuickOnButtonsClicked()), this, SLOT(OnButtonStartQuickOn()));
-    connect(&m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SaveQuickOnConfig()));
+    connect(m_SettingSave, SIGNAL(clicked()), this, SIGNAL(SaveQuickOnConfig()));
     connect(this, SIGNAL(SaveQuickOnConfig()), this, SLOT(OnSaveQuickOnConfig()));
     connect(this, SIGNAL(SetupQuickOnSettingStatus()), this, SLOT(OnSetupQuickOnSettingStatus()));
     connect(this, SIGNAL(SetupQuickOnCurrentStatus(int)), this, SLOT(OnSetupQuickOnCurrentStatus(int)));
     connect(this, SIGNAL(SetupQuickOnStartStatus()), this, SLOT(OnSetupQuickOnStartStatus()));
-    connect(&m_RetryButton, SIGNAL(clicked()), this, SIGNAL(RetryConfig()));
+    connect(m_RetryButton, SIGNAL(clicked()), this, SIGNAL(RetryConfig()));
     connect(this, SIGNAL(RetryConfig()), this, SLOT(OnRetryConfig()));
 
-    connect(&m_StopQuickOn, SIGNAL(clicked()), this, SIGNAL(StopQuickOn()));
+    connect(m_StopQuickOn, SIGNAL(clicked()), this, SIGNAL(StopQuickOn()));
     connect(this, SIGNAL(StopQuickOn()), this, SLOT(oneClickStop()));
-    connect(&m_VisitQuickOnPage, SIGNAL(clicked()), this, SIGNAL(VisitQuickOn()));
+    connect(m_VisitQuickOnPage, SIGNAL(clicked()), this, SIGNAL(VisitQuickOn()));
     connect(this, SIGNAL(VisitQuickOn()), this, SLOT(clickVisit()));
-    
-    m_QuickOnWidget.setProperty("forUse","QuickOn");
-    m_QuickOnWidget.setLayout(&m_QuickOnLayer);
-    m_QuickOnLayer.setSpacing(0);
-    m_QuickOnLayer.setContentsMargins(0,0,0,0);
 
-    m_SettingWidget.setProperty("forUse","QuickOn");
-    m_SettingSave.setProperty("forUse","saveBtn");
-    m_btnStartQuickOn.setProperty("forUse","uninstallBtn");
-    m_StopQuickOn.setProperty("forUse","installBtn");
-    m_VisitQuickOnPage.setProperty("forUse","installBtn");
-    m_Domain0.setProperty("forUse", "inputEdit");
-    m_Dot.setObjectName("dot");
-    m_Usr.setProperty("forUse", "tip");
-    m_UsrName.setProperty("forUse", "tipEdit");
-    m_Pass.setProperty("forUse", "tip");
-    m_UsrPass.setProperty("forUse", "tipEdit");
-    m_SettingTitle.setObjectName("QuickOnTitle");
-    m_CurrentStatus.setProperty("forColor", "status");
-    m_RetryButton.setProperty("forUse", "uninstallBtn");
+    m_PreStartWidget->setProperty("forUse","QuickOn");
+    m_PreStartWidget->setLayout(m_PreStartLayout);
+    m_PreStartLayout->setSpacing(0);
+    m_PreStartLayout->setContentsMargins(0,0,0,0);
 
-    m_CurrentStatus.setAlignment(Qt::AlignCenter);
+    m_QuickOnWidget->setProperty("forUse","QuickOn");
+    m_QuickOnWidget->setLayout(m_QuickOnLayer);
+    m_QuickOnLayer->setSpacing(0);
+    m_QuickOnLayer->setContentsMargins(0,0,0,0);
 
-    m_Dot.setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-    m_UsrName.setEnabled(false);
-    m_UsrPass.setEnabled(false);
+    m_SettingWidget->setProperty("forUse","QuickOn");
+    m_SettingSave->setProperty("forUse","saveBtn");
+    m_btnStartQuickOn->setProperty("forUse","uninstallBtn");
+    m_StopQuickOn->setProperty("forUse","installBtn");
+    m_VisitQuickOnPage->setProperty("forUse","installBtn");
+    m_Domain0->setProperty("forUse", "inputEdit");
+    m_Dot->setObjectName("dot");
+    m_Usr->setProperty("forUse", "tip");
+    m_UsrName->setProperty("forUse", "tipEdit");
+    m_Pass->setProperty("forUse", "tip");
+    m_UsrPass->setProperty("forUse", "tipEdit");
+    m_SettingTitle->setObjectName("QuickOnTitle");
+    m_CurrentStatus->setProperty("forColor", "status");
+    m_RetryButton->setProperty("forUse", "uninstallBtn");
 
-    m_QuickOnLayer.addWidget(&m_btnStartQuickOn, 0, Qt::AlignHCenter);
-    m_QuickOnLayer.addWidget(&m_SettingWidget);
-    m_SettingWidget.setLayout(&m_SettingLayout);
-    m_SettingLayout.addWidget(&m_SettingTitle, 0, Qt::AlignHCenter);
-    m_SettingLayout.addLayout(&m_DomainLayer);
-    m_SettingLayout.setSpacing(0);
-    m_DomainLayer.setSpacing(0);
-    m_DomainLayer.addWidget(&m_Domain0);
-    m_DomainLayer.addWidget(&m_Dot);
-    m_DomainLayer.addWidget(&m_Domain1);
-//    m_SettingLayout.addWidget(&m_CustomizeDomain, 0, Qt::AlignHCenter);
-    m_SettingLayout.addWidget(&m_ValidDomain, 0, Qt::AlignHCenter);
-    m_SettingLayout.addWidget(&m_SettingSave, 0, Qt::AlignHCenter);
-    m_QuickOnLayer.addWidget(&m_CurrentStatus);
-    m_QuickOnLayer.addWidget(&m_RetryButton);
-    m_QuickOnLayer.addWidget(&m_StartWidget);
-    m_StartWidget.setLayout(&m_StartLayer);
-    m_StartLayer.setSpacing(0);
-//    m_StartLayer.setContentsMargins(0,0,0,0);
-    m_StartLayer.addSpacing(30);
-    m_StartLayer.addLayout(&m_StartButtonsLayer);
-    m_StartButtonsLayer.addWidget(&m_StopQuickOn);
-    m_StartButtonsLayer.addSpacing(15);
-    m_StartButtonsLayer.addWidget(&m_VisitQuickOnPage);
-    m_StartLayer.addSpacing(-30);
-    m_StartLayer.addLayout(&m_UserLayer);
-    
-    m_UserLayer.setSpacing(0);
-    m_UserLayer.setContentsMargins(8,0,0,0);
-    m_UserLayer.addWidget(&m_Usr);
-    m_UserLayer.addWidget(&m_UsrName);
-    m_UserLayer.addWidget(&m_Pass);
-    m_UserLayer.addWidget(&m_UsrPass);
+    m_CurrentStatus->setAlignment(Qt::AlignCenter);
+
+    m_Dot->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
+    m_UsrName->setEnabled(false);
+    m_UsrPass->setEnabled(false);
+
+    m_QuickOnLayer->addWidget(m_PreStartWidget);
+    m_PreStartLayout->addWidget(m_btnStartQuickOn, 0, Qt::AlignHCenter);
+
+    m_QuickOnLayer->addWidget(m_SettingWidget);
+    m_SettingWidget->setLayout(m_SettingLayout);
+    m_SettingLayout->addWidget(m_SettingTitle, 0, Qt::AlignHCenter);
+    m_SettingLayout->addLayout(m_DomainLayer);
+    m_SettingLayout->setSpacing(0);
+    m_DomainLayer->setSpacing(0);
+    m_DomainLayer->addWidget(m_Domain0);
+    m_DomainLayer->addWidget(m_Dot);
+    m_DomainLayer->addWidget(m_Domain1);
+//    m_SettingLayout->addWidget(m_CustomizeDomain, 0, Qt::AlignHCenter);
+    m_SettingLayout->addWidget(m_ValidDomain, 0, Qt::AlignHCenter);
+    m_SettingLayout->addWidget(m_SettingSave, 0, Qt::AlignHCenter);
+    m_QuickOnLayer->addWidget(m_CurrentStatus);
+    m_QuickOnLayer->addWidget(m_RetryButton);
+    m_QuickOnLayer->addWidget(m_StartWidget);
+    m_StartWidget->setLayout(m_StartLayer);
+    m_StartLayer->setSpacing(0);
+//    m_StartLayer->setContentsMargins(0,0,0,0);
+    m_StartLayer->addSpacing(30);
+    m_StartLayer->addLayout(m_StartButtonsLayer);
+    m_StartButtonsLayer->addWidget(m_StopQuickOn);
+    m_StartButtonsLayer->addSpacing(15);
+    m_StartButtonsLayer->addWidget(m_VisitQuickOnPage);
+    m_StartLayer->addSpacing(-30);
+    m_StartLayer->addLayout(m_UserLayer);
+
+    m_UserLayer->setSpacing(0);
+    m_UserLayer->setContentsMargins(8,0,0,0);
+    m_UserLayer->addWidget(m_Usr);
+    m_UserLayer->addWidget(m_UsrName);
+    m_UserLayer->addWidget(m_Pass);
+    m_UserLayer->addWidget(m_UsrPass);
 }
 
 void MainWindow::createRightUI()
@@ -962,8 +982,6 @@ void MainWindow::appendMsg(MsgResult msg)
 
 void MainWindow::onAppStateChanged()
 {
-    if(m_globalControl != nullptr)
-        m_globalControl->stateChanged();
 }
 
 void MainWindow::onServiceStateChanged(QString typeAndState)
@@ -997,32 +1015,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        auto is_widget_clicked = [&](QWidget* widget)
-        {
-            if (!widget->isVisible())
-                return false;
-
-            QRect geometry = widget->geometry();
-            QPoint pt = widget->mapFromGlobal(event->globalPos());
-            if (!geometry.contains(pt))
-                return false;
-
-            event->accept();
-            return true;
-        };
-
-        if (is_widget_clicked(&m_btnStartQuickOn))
-        {
-            L_TRACE("-----------------------");
-            emit StartQuickOnButtonsClicked();
-            return;
-        }
-        if (is_widget_clicked(&m_SettingSave))
-        {
-            L_TRACE("+++++++++++++++++++++++");
-            emit SaveQuickOnConfig();
-            return;
-        }
         m_Drag = true;
         m_DragPosition = event->globalPos() - this->pos();
         event->accept();
