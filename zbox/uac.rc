@@ -1,5 +1,5 @@
 1 24 uac.manifest
-IDI_ICON1 ICON DISCARDABLE "zbox.ico"
+IDI_ICON1 ICON DISCARDABLE "zentao.ico"
 
 # if defined(UNDER_CE)
 #  include <winbase.h>
