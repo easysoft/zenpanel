@@ -23,15 +23,7 @@ ZenPanel 是一款集成 **Windows 环境下 Apache、MySQL、PHP 等服务** �
 3. **高度可定制化**  
    - 自定义 **运行时配置、组件服务参数、界面语言**  
    - 灵活适配不同业务场景的个性化需求  
-
-
-## ⚖️ Qt 使用声明  
-本软件基于 **Qt 框架** 开发，严格遵守 Qt 开源协议（LGPL v3）或商业授权规则：  
-- 开源版本遵循 [Qt 开源协议](https://www.qt.io/licensing/opensource)，修改代码需合规开源  
-- 商业用途请通过 [Qt 官方渠道](https://www.qt.io/buy) 获取合法授权  
-- Qt 商标归 The Qt Company 所有，本项目仅用于技术实现  
-
-
+ 
 ## 📥 快速开始  
 ### 🔧 环境要求  
 - 系统：Windows 7/10/11（64位）  
@@ -50,7 +42,8 @@ ZenPanel 是一款集成 **Windows 环境下 Apache、MySQL、PHP 等服务** �
 
 
 ## 📜 开源协议  
-本项目代码基于 **Qt 框架** 开发，采用 **LGPL v3 协议**，详见 [LICENSE](LICENSE) 文件。  Qt 组件版权归原作者所有，使用需遵守其协议要求。  
+ZenPanel 作为开源软件项目，采用 **LGPL v3 协议** 发布，详见 [LICENSE](LICENSE) 文件。  
+本项目基于Qt构建，采用**LGPL v3协议**，开源版本请遵循 [LICENSE](LICENSE) ，修改代码需合规开源，商业用途请通过 [Qt 官方渠道](https://www.qt.io/buy) 获取合法授权。
 
 
 ## ✨ 贡献指南  
